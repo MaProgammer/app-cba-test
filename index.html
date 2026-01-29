@@ -40,6 +40,7 @@
         #main-container { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
         #map { flex: 1; width: 100%; background: #e5e3df; z-index: 1; }
         
+        /* Botão Localizar */
         .fab-locate {
             position: absolute; bottom: 20px; right: 16px;
             background: white; width: 48px; height: 48px; border-radius: 50%;
@@ -61,7 +62,7 @@
 
         /* KPI CARD (REDUZIDO) */
         .data-card {
-            background: white; border-radius: 12px; padding: 10px; /* Padding reduzido */
+            background: white; border-radius: 12px; padding: 10px; 
             box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 8px;
         }
         .kpi-row { 
@@ -70,11 +71,11 @@
         }
         .kpi-item { text-align: center; flex: 1; }
         
-        /* LETRAS MENORES */
+        /* FONTE MENOR */
         .kpi-val { font-size: 1rem; font-weight: 800; color: #1565C0; display: block; line-height: 1; }
         .kpi-lbl { font-size: 0.6rem; color: #888; font-weight: 700; text-transform: uppercase; margin-top: 2px; display: block; }
 
-        /* SLIDER DUPLO */
+        /* SLIDER DUPLO (LINHA ÚNICA) */
         .range-container { position: relative; width: 100%; height: 30px; margin-top: 5px; }
         
         .slider-track-bg { 
@@ -94,7 +95,7 @@
             background: none; transform: translateY(-50%); z-index: 3; margin: 0;
         }
 
-        /* Botão do Slider menor */
+        /* Botão do Slider */
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none; pointer-events: auto;
             width: 22px; height: 22px; border-radius: 50%; 
@@ -221,9 +222,11 @@
     function initMap() {
         map = L.map('map', {zoomControl: false}).setView([-14.235, -51.925], 4);
         
-        // MAPA FIXADO NO MT1 (GOOGLE SATELLITE HYBRID)
-        L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { 
+        // --- MAPA CORRIGIDO (Igual ao seu código funcional) ---
+        // Adiciona HTTPS para evitar bloqueios de segurança
+        L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { 
             maxZoom: 20, 
+            subdomains: ['mt0','mt1','mt2','mt3'],
             attribution: '© Google'
         }).addTo(map);
 
@@ -318,6 +321,7 @@
             }
             activeLine.setLatLngs(latlngs);
             
+            // --- AUTO AJUSTE DE ZOOM E SLIDER ---
             if (gpxData.length > 0) {
                 const sStart = document.getElementById('sStart');
                 const sEnd = document.getElementById('sEnd');

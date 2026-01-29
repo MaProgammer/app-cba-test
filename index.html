@@ -14,11 +14,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        /* --- ESTILOS GERAIS (LAYOUT TOP) --- */
+        /* --- ESTILO VISUAL "TOP" --- */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         body { margin: 0; padding: 0; height: 100dvh; width: 100vw; display: flex; flex-direction: column; background: #f0f2f5; overflow: hidden; }
 
-        /* --- CABEÇALHO --- */
+        /* HEADER */
         header { 
             background: #1565C0; color: white; height: 56px; flex-shrink: 0;
             display: flex; align-items: center; justify-content: space-between; 
@@ -37,56 +37,65 @@
         }
         .btn-header:active { background: rgba(255,255,255,0.3); }
 
-        /* Animação do Botão REC */
-        #btnRec.recording { background: #d32f2f; color: white; animation: pulse 1.5s infinite; border: 1px solid white; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(211, 47, 47, 0); } 100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); } }
-
-        #fileInput { display: none; }
-
-        /* --- MAPA E ÁREA CENTRAL --- */
+        /* MAPA & CONTAINER */
         #main-container { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
         #map { flex: 1; width: 100%; background: #e5e3df; z-index: 1; }
         
-        /* Botão Flutuante de Localização */
+        /* BOTÃO FLUTUANTE LOCALIZAR */
         .fab-locate {
-            position: absolute; bottom: 16px; right: 16px;
-            background: white; width: 48px; height: 48px; border-radius: 50%;
-            border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            position: absolute; bottom: 24px; right: 16px;
+            background: white; width: 52px; height: 52px; border-radius: 50%;
+            border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             z-index: 900; display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
+            cursor: pointer; transition: transform 0.2s;
         }
-        .fab-locate svg { width: 24px; height: 24px; fill: #555; }
+        .fab-locate:active { transform: scale(0.95); }
+        .fab-locate svg { width: 26px; height: 26px; fill: #555; }
 
-        /* --- PAINEL DE CONTROLE (CSS DO OUTRO CÓDIGO) --- */
+        /* PAINEL DE CONTROLE (Visual Card) */
         #controls { 
-            max-height: 45dvh; 
+            max-height: 50dvh; /* Altura máxima */
             background: #f2f4f8; 
-            box-shadow: 0 -4px 16px rgba(0,0,0,0.15); border-radius: 16px 16px 0 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.15); border-radius: 20px 20px 0 0;
             display: flex; flex-direction: column; z-index: 999; position: relative;
         }
 
-        .panel-scroll { 
-            flex: 1; padding: 12px 12px 0 12px; 
-            overflow-y: auto; -webkit-overflow-scrolling: touch; 
-        }
+        .panel-scroll { flex: 1; padding: 16px 16px 0 16px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
+        /* CARD DE DADOS */
         .data-card {
-            background: white; border-radius: 12px; padding: 12px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 0; 
+            background: white; border-radius: 16px; padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 12px;
         }
 
-        .kpi-row { display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
+        .kpi-row { display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0; }
         .kpi-item { text-align: center; flex: 1; }
-        .kpi-val { font-size: 1.1rem; font-weight: 800; color: #1565C0; display: block; line-height: 1; }
-        .kpi-lbl { font-size: 0.65rem; color: #888; font-weight: 700; text-transform: uppercase; margin-top: 4px; display: block; }
+        .kpi-val { font-size: 1.25rem; font-weight: 800; color: #1565C0; display: block; line-height: 1; }
+        .kpi-lbl { font-size: 0.7rem; color: #888; font-weight: 700; text-transform: uppercase; margin-top: 4px; display: block; }
 
-        .slider-row { display: flex; flex-direction: column; gap: 8px; }
+        /* SLIDERS */
+        .slider-row { display: flex; flex-direction: column; gap: 10px; }
         .slider-wrapper { display: flex; align-items: center; gap: 10px; }
-        .slider-label { font-size: 0.7rem; font-weight: bold; color: #555; width: 40px; }
-        input[type=range] { flex: 1; height: 4px; background: #e0e0e0; border-radius: 2px; -webkit-appearance: none; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: #1565C0; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .slider-label { font-size: 0.7rem; font-weight: bold; color: #555; width: 45px; }
+        input[type=range] { flex: 1; height: 6px; background: #e0e0e0; border-radius: 3px; -webkit-appearance: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; background: #1565C0; border-radius: 50%; box-shadow: 0 1px 4px rgba(0,0,0,0.3); border: 2px solid white; }
 
-        /* --- RODAPÉ (BOTÕES DE AÇÃO) --- */
+        /* LISTA DE PONTOS (Estilizada) */
+        .list-label { font-size: 0.75rem; font-weight: 700; color: #666; text-transform: uppercase; margin: 12px 0 8px 4px; display: block; }
+        #pointList { list-style: none; padding: 0; margin: 0; padding-bottom: 10px; }
+        #pointList li { 
+            background: white; border-radius: 8px; margin-bottom: 8px; padding: 10px 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 0.9rem;
+        }
+        #pointList li span { display: flex; align-items: center; gap: 8px; font-weight: 500; color: #333; }
+        .btn-del { 
+            color: #d32f2f; background: #ffebee; width: 28px; height: 28px; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 14px; font-weight: bold;
+        }
+
+        /* FOOTER (BOTÕES) */
         .panel-footer {
             flex-shrink: 0; padding: 12px 16px; background: #f2f4f8; 
             padding-bottom: calc(12px + env(safe-area-inset-bottom));
@@ -94,7 +103,7 @@
         }
 
         .btn-action {
-            height: 48px; border-radius: 10px; border: none; font-weight: 700; font-size: 0.85rem;
+            height: 50px; border-radius: 12px; border: none; font-weight: 700; font-size: 0.85rem;
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
             cursor: pointer; transition: transform 0.1s; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
@@ -108,7 +117,11 @@
         
         .btn-save { background: #2e7d32; color: white; grid-column: 3; }
 
-        /* Mensagens de Interface */
+        /* Animação REC */
+        #btnRec.recording { background: #d32f2f; color: white; animation: pulse 1.5s infinite; border: 1px solid white; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(211, 47, 47, 0); } 100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); } }
+
+        /* Mensagens flutuantes */
         #modeMsg { 
             position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); 
             font-size: 0.8rem; color: #1565C0; font-weight: 700; 
@@ -118,14 +131,17 @@
         }
         #modeMsg.visible { opacity: 1; bottom: 80px; }
         
-        #gpsMsg { background: #ffebee; color: #c62828; text-align: center; font-size: 0.75rem; padding: 4px; font-weight: 600; display: none; }
+        #gpsMsg { background: #ffebee; color: #c62828; text-align: center; font-size: 0.75rem; padding: 6px; font-weight: 700; display: none; }
+        #emptyMsg { text-align:center; color:#999; font-size:0.8rem; margin:10px 0; font-style: italic; }
 
         .hidden { display: none; }
+        #fileInput { display: none; }
         
-        /* Ajuste para Desktop */
+        /* Desktop */
         @media (min-width: 768px) {
             #main-container { flex-direction: row; }
-            #controls { width: 360px; height: 100%; border-radius: 0; border-left: 1px solid #ddd; max-height: 100%; }
+            #controls { width: 380px; height: 100%; border-radius: 0; border-left: 1px solid #ddd; max-height: 100%; }
+            .fab-locate { bottom: 24px; right: 24px; }
         }
     </style>
 </head>
@@ -134,14 +150,14 @@
 <header>
     <div class="app-title">
         <span>🛰️ CBA Master</span>
-        <span class="app-subtitle" id="statusHeader">Pronto</span>
+        <span class="app-subtitle" id="statusHeader">Pronto para uso</span>
     </div>
     <div class="header-actions">
         <button id="btnRec" class="btn-header" onclick="toggleRecording()">
             <span>🔴</span> REC
         </button>
         <button class="btn-header" onclick="document.getElementById('fileInput').click()">
-            <span>📂</span>
+            <span>📂</span> Abrir
         </button>
     </div>
     <input type="file" id="fileInput" accept=".gpx">
@@ -177,6 +193,10 @@
                     </div>
                 </div>
             </div>
+
+            <span class="list-label">Lista de Ocorrências</span>
+            <div id="emptyMsg">Nenhuma ocorrência registrada</div>
+            <ul id="pointList"></ul>
         </div>
 
         <div class="panel-footer">
@@ -199,49 +219,44 @@
 </div>
 
 <script>
-    // --- LÓGICA DO APP ---
+    // --- LÓGICA DO SEU CÓDIGO FUNCIONAL ---
     let map, activeLine, userMarker;
     let gpxData = []; 
     let customPoints = []; 
     let currentMode = null; 
     let tempPoint = null; 
+    
     let isRecording = false;
     let watchId = null;
     let wakeLock = null;
 
     function initMap() {
-        // --- AQUI ESTÁ A LÓGICA DO MAPA CORRIGIDA ---
-        // Configuração inicial do Leaflet
         map = L.map('map', {zoomControl: false}).setView([-14.235, -51.925], 4);
-        
-        // Link híbrido do Google (Satélite + Ruas) com alternância de servidores (mt0, mt1...)
-        // Isso garante que o mapa carregue "certinho" como no seu teste
-        L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { 
+        // Usa HTTPS para evitar bloqueio em servidores seguros, mas mantém a lógica do seu mapa híbrido
+        L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { 
             maxZoom: 20, 
-            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-            attribution: '© Google' 
+            subdomains: ['mt0','mt1','mt2','mt3'],
+            attribution: '© Google'
         }).addTo(map);
 
-        // Linha do trajeto (Ciano Brilhante)
         activeLine = L.polyline([], {color: '#00FFFF', weight: 6, opacity: 0.8}).addTo(map);
-        // Marcador do Usuário
         userMarker = L.circleMarker([0,0], { radius: 8, fillColor: '#2962ff', color: '#fff', weight: 3, fillOpacity: 1 });
     }
 
-    // --- FUNÇÕES DE GPS E GRAVAÇÃO ---
     function locateMe() {
-        if (!navigator.geolocation) return alert("Sem suporte a GPS.");
+        if (!navigator.geolocation) { alert("Seu navegador não suporta GPS."); return; }
         const btn = document.querySelector('.fab-locate svg');
         btn.style.fill = '#2962ff';
+
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 const lat = pos.coords.latitude; const lon = pos.coords.longitude;
                 if(!map.hasLayer(userMarker)) userMarker.addTo(map);
                 userMarker.setLatLng([lat, lon]);
-                map.flyTo([lat, lon], 18);
+                map.flyTo([lat, lon], 18, { animate: true, duration: 1.5 });
                 btn.style.fill = '#555';
             },
-            (err) => { alert("Erro GPS: " + err.message); btn.style.fill = '#555'; },
+            (err) => { alert("Erro ao obter localização."); btn.style.fill = '#555'; },
             { enableHighAccuracy: true }
         );
     }
@@ -251,24 +266,25 @@
         const statusHeader = document.getElementById('statusHeader');
         
         if (!isRecording) {
-            try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
-            if (confirm("Iniciar nova gravação?")) clearData();
+            try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
+            if (confirm("Iniciar nova gravação? (Isso limpará o mapa atual)")) clearData();
 
             isRecording = true;
             btn.innerHTML = "<span>⏹</span>";
             btn.classList.add('recording');
-            statusHeader.innerText = "Gravando...";
+            statusHeader.innerText = "Gravando Rota...";
             document.getElementById('gpsMsg').style.display = 'block';
 
             if ("geolocation" in navigator) {
-                watchId = navigator.geolocation.watchPosition(successGPS, errorGPS, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+                watchId = navigator.geolocation.watchPosition(successGPS, errorGPS, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
             }
         } else {
             isRecording = false;
             btn.innerHTML = "<span>🔴</span> REC";
             btn.classList.remove('recording');
-            statusHeader.innerText = "Pausado";
+            statusHeader.innerText = "Gravação Finalizada";
             document.getElementById('gpsMsg').style.display = 'none';
+
             if (watchId !== null) navigator.geolocation.clearWatch(watchId);
             if (wakeLock !== null) { wakeLock.release(); wakeLock = null; }
             if(gpxData.length > 0) map.fitBounds(activeLine.getBounds());
@@ -277,8 +293,10 @@
 
     function successGPS(position) {
         document.getElementById('gpsMsg').style.display = 'none';
-        const lat = position.coords.latitude; const lon = position.coords.longitude;
-        const ele = position.coords.altitude || 0; const acc = position.coords.accuracy;
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        const ele = position.coords.altitude || 0;
+        const acc = position.coords.accuracy;
 
         if(!map.hasLayer(userMarker)) userMarker.addTo(map);
         userMarker.setLatLng([lat, lon]);
@@ -286,17 +304,18 @@
         if (gpxData.length === 0) map.setView([lat, lon], 18);
         else map.panTo([lat, lon]);
 
-        if (acc > 50) return; // Ignora GPS impreciso
+        if (acc > 50) return; 
 
         let distTotal = 0;
         if (gpxData.length > 0) {
             const last = gpxData[gpxData.length - 1];
             const d = calcDistance(last.lat, last.lon, lat, lon);
-            if (d < 0.003) return; // Filtro de movimento mínimo (3m)
+            if (d < 0.003) return; 
             distTotal = last.dist + d;
         }
 
-        gpxData.push({ lat, lon, ele, dist: distTotal });
+        const newPoint = { lat, lon, ele, dist: distTotal };
+        gpxData.push(newPoint);
         activeLine.addLatLng([lat, lon]);
         updateUI();
     }
@@ -312,10 +331,11 @@
         updateUI(); renderPoints();
     }
 
-    // --- IMPORTAR GPX ---
     document.getElementById('fileInput').addEventListener('change', function(e) {
-        const file = e.target.files[0]; if (!file) return;
-        if(isRecording) toggleRecording(); clearData();
+        const file = e.target.files[0];
+        if (!file) return;
+        if(isRecording) toggleRecording();
+        clearData();
         document.getElementById('statusHeader').innerText = file.name;
 
         const reader = new FileReader();
@@ -323,84 +343,112 @@
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
             const trkpts = xmlDoc.getElementsByTagName("trkpt");
-            let distTotal = 0; const latlngs = [];
+            let distTotal = 0;
+            const latlngs = [];
+
             for (let i = 0; i < trkpts.length; i++) {
                 const lat = parseFloat(trkpts[i].getAttribute("lat"));
                 const lon = parseFloat(trkpts[i].getAttribute("lon"));
                 const ele = parseFloat(trkpts[i].getElementsByTagName("ele")[0]?.textContent || 0);
-                if (i > 0) { const prev = gpxData[i-1]; distTotal += calcDistance(prev.lat, prev.lon, lat, lon); }
-                gpxData.push({lat, lon, ele, dist: distTotal}); latlngs.push([lat, lon]);
+                if (i > 0) {
+                    const prev = gpxData[i-1];
+                    distTotal += calcDistance(prev.lat, prev.lon, lat, lon);
+                }
+                gpxData.push({lat, lon, ele, dist: distTotal});
+                latlngs.push([lat, lon]);
             }
             activeLine.setLatLngs(latlngs);
-            if (gpxData.length > 0) { map.fitBounds(activeLine.getBounds(), {padding: [20, 20]}); updateUI(); }
+            if (gpxData.length > 0) {
+                map.fitBounds(activeLine.getBounds(), {padding: [20, 20]});
+                updateUI();
+            }
         };
         reader.readAsText(file);
     });
 
-    // --- CÁLCULOS E UI ---
     function calcDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371; const dLat = (lat2 - lat1) * Math.PI / 180;
+        const R = 6371; 
+        const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLon = (lon2 - lon1) * Math.PI / 180;
         const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
         return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
     }
 
     function updateUI() {
-        const sStart = document.getElementById('sStart'); const sEnd = document.getElementById('sEnd');
-        if(sEnd.value == sEnd.max) { sStart.max = gpxData.length - 1; sEnd.max = gpxData.length - 1; sEnd.value = gpxData.length - 1; } 
-        else { sStart.max = gpxData.length - 1; sEnd.max = gpxData.length - 1; }
-        if(sStart.disabled) { sStart.disabled = false; sEnd.disabled = false; }
+        const sStart = document.getElementById('sStart');
+        const sEnd = document.getElementById('sEnd');
         
-        if(gpxData.length > 0) {
-            const i = parseInt(sStart.value); let j = parseInt(sEnd.value);
-            if (i >= j) { j = i + 1; sEnd.value = j; }
-            const slice = gpxData.slice(i, j + 1);
-            const dist = slice.length > 0 ? slice[slice.length-1].dist - slice[0].dist : 0;
-            let eleGain = 0;
-            for(let k=1; k < slice.length; k++) if(slice[k].ele > slice[k-1].ele) eleGain += slice[k].ele - slice[k-1].ele;
-            
-            document.getElementById('valDist').innerText = dist.toFixed(2);
-            document.getElementById('valEle').innerText = eleGain.toFixed(0);
-            document.getElementById('valPts').innerText = slice.length;
-            
-            activeLine.setLatLngs(slice.map(p => [p.lat, p.lon]));
-        }
+        if(sEnd.value == sEnd.max) {
+             sStart.max = gpxData.length - 1; sEnd.max = gpxData.length - 1; sEnd.value = gpxData.length - 1;
+        } else { sStart.max = gpxData.length - 1; sEnd.max = gpxData.length - 1; }
+        
+        if(sStart.disabled) { sStart.disabled = false; sEnd.disabled = false; }
+        updateMapFromSliders();
     }
 
-    document.getElementById('sStart').addEventListener('input', updateUI);
-    document.getElementById('sEnd').addEventListener('input', updateUI);
+    function updateMapFromSliders() {
+        if(gpxData.length === 0) return;
+        const i = parseInt(document.getElementById('sStart').value);
+        let j = parseInt(document.getElementById('sEnd').value);
+        if (i >= j) { j = i + 1; document.getElementById('sEnd').value = j; }
+        
+        const slice = gpxData.slice(i, j + 1);
+        const dist = slice[slice.length-1].dist - slice[0].dist;
+        let eleGain = 0;
+        for(let k=1; k < slice.length; k++) { if(slice[k].ele > slice[k-1].ele) eleGain += slice[k].ele - slice[k-1].ele; }
 
-    // --- MODOS E MARCADORES ---
+        document.getElementById('valDist').innerText = dist.toFixed(2);
+        document.getElementById('valEle').innerText = eleGain.toFixed(0);
+        document.getElementById('valPts').innerText = slice.length;
+        
+        activeLine.setLatLngs(slice.map(p => [p.lat, p.lon]));
+    }
+
+    document.getElementById('sStart').addEventListener('input', updateMapFromSliders);
+    document.getElementById('sEnd').addEventListener('input', updateMapFromSliders);
+
     function toggleMode(mode) {
-        const btnAlert = document.getElementById('btnAlert'); const btnInfo = document.getElementById('btnInfo');
+        const btnAlert = document.getElementById('btnAlert');
+        const btnInfo = document.getElementById('btnInfo');
         const msg = document.getElementById('modeMsg');
         
         if (currentMode === mode) {
-            currentMode = null; btnAlert.classList.remove('active'); btnInfo.classList.remove('active');
-            msg.classList.remove('visible'); L.DomUtil.removeClass(map.getContainer(), 'leaflet-crosshair');
+            currentMode = null;
+            btnAlert.classList.remove('active'); btnInfo.classList.remove('active');
+            msg.classList.remove('visible'); // Oculta a mensagem
+            L.DomUtil.removeClass(map.getContainer(), 'leaflet-crosshair');
         } else {
-            currentMode = mode; L.DomUtil.addClass(map.getContainer(), 'leaflet-crosshair');
+            currentMode = mode;
+            L.DomUtil.addClass(map.getContainer(), 'leaflet-crosshair');
             if(mode === 'alert') { btnAlert.classList.add('active'); btnInfo.classList.remove('active'); msg.innerText = "Toque na rota para PERIGO ⚠️"; }
             else { btnInfo.classList.add('active'); btnAlert.classList.remove('active'); msg.innerText = "Toque na rota para INFO ℹ️"; }
-            msg.classList.add('visible');
+            msg.classList.add('visible'); // Mostra a mensagem
         }
     }
 
+    initMap();
     map.on('click', function(e) {
         if (!currentMode) return;
-        let target = { lat: e.latlng.lat, lon: e.latlng.lng, ele: 0 };
+        let target = null;
+
         if (gpxData.length > 0) {
-            let minDist = Infinity;
+            let nearest = null; let minDist = Infinity;
             for (const p of gpxData) {
                 const d = Math.pow(p.lat - e.latlng.lat, 2) + Math.pow(p.lon - e.latlng.lng, 2);
-                if (d < minDist) { minDist = d; target = p; }
+                if (d < minDist) { minDist = d; nearest = p; }
             }
+            target = nearest;
+        } else {
+            target = { lat: e.latlng.lat, lon: e.latlng.lng, ele: 0, dist: 0 };
         }
-        const label = prompt("Descrição:", currentMode === 'alert' ? "Buraco" : "Nota");
-        if (label) {
-            tempPoint = { ...target, label: label, type: currentMode, image: null };
-            if (confirm("Adicionar foto?")) document.getElementById('imgUpload').click();
-            else addPoint(tempPoint);
+
+        if (target) {
+            const label = prompt("Descrição:", currentMode === 'alert' ? "Buraco" : "Nota");
+            if (label) {
+                tempPoint = { ...target, label: label, type: currentMode, image: null };
+                if (confirm("Adicionar foto?")) document.getElementById('imgUpload').click();
+                else addPoint(tempPoint);
+            }
         }
         toggleMode(currentMode);
     });
@@ -408,17 +456,22 @@
     document.getElementById('imgUpload').addEventListener('change', function(e) {
         if (this.files && this.files[0] && tempPoint) {
             const reader = new FileReader();
-            reader.onload = function(evt) { resizeImage(evt.target.result, function(res) { tempPoint.image = res; addPoint(tempPoint); }); };
+            reader.onload = function(evt) {
+                resizeImage(evt.target.result, function(res) { tempPoint.image = res; addPoint(tempPoint); });
+            };
             reader.readAsDataURL(this.files[0]);
         }
     });
 
     function resizeImage(base64Str, callback) {
-        const img = new Image(); img.src = base64Str;
+        const img = new Image();
+        img.src = base64Str;
         img.onload = function() {
-            const canvas = document.createElement('canvas'); const MAX_W = 600; const scale = MAX_W / img.width;
+            const canvas = document.createElement('canvas');
+            const MAX_W = 600; const scale = MAX_W / img.width;
             canvas.width = MAX_W; canvas.height = img.height * scale;
-            const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             callback(canvas.toDataURL('image/jpeg', 0.6));
         }
     }
@@ -428,18 +481,26 @@
     function removePoint(i) { customPoints.splice(i, 1); renderPoints(); }
 
     function renderPoints() {
+        const list = document.getElementById('pointList'); list.innerHTML = '';
         markersLayer.clearLayers();
+        if(customPoints.length > 0) document.getElementById('emptyMsg').style.display = 'none';
+        else document.getElementById('emptyMsg').style.display = 'block';
+
         customPoints.forEach((p, idx) => {
+            const iconChar = p.type === 'alert' ? '⚠️' : 'ℹ️';
+            const imgChar = p.image ? '📷' : '';
+            // HTML da lista bonitinho
+            list.innerHTML += `<li><span>${iconChar} ${p.label} ${imgChar}</span><div class="btn-del" onclick="removePoint(${idx})">✕</div></li>`;
+            
             const color = p.type === 'alert' ? '#ef6c00' : '#1565c0';
             const icon = L.divIcon({ className: 'c-pin', html: `<div style="background:${color};width:16px;height:16px;border:2px solid white;border-radius:50%;box-shadow:0 0 4px black;"></div>` });
-            const m = L.marker([p.lat, p.lon], {icon: icon}).addTo(markersLayer);
-            m.bindPopup(`<b>${p.label}</b><br><button onclick="removePoint(${idx})" style="color:red;font-weight:bold;border:1px solid #ddd;background:white;padding:4px;margin-top:4px;">Excluir</button>`);
+            L.marker([p.lat, p.lon], {icon: icon}).addTo(markersLayer);
         });
     }
 
-    // --- SALVAR KML ---
     async function downloadKML() {
         if (gpxData.length === 0 && customPoints.length === 0) return alert("Nada para salvar.");
+        
         const i = parseInt(document.getElementById('sStart').value);
         const j = parseInt(document.getElementById('sEnd').value);
         const slice = gpxData.slice(i, j + 1);
@@ -460,20 +521,32 @@
 
         const coords = slice.map(p => `${p.lon},${p.lat},${p.ele}`).join(' ');
         const distTotal = slice.length > 0 ? (slice[slice.length-1].dist - slice[0].dist).toFixed(2) : "0.00";
+        
         let pointsXML = '';
         customPoints.forEach(p => {
             const style = p.type === 'alert' ? 'iconAlert' : 'iconInfo';
             const img = p.image ? `<br><img src="${p.image}" style="width:250px; border:1px solid #ccc;">` : '';
             pointsXML += `<Placemark><name>${p.label}</name><styleUrl>#${style}</styleUrl><description><![CDATA[<h3>${p.label}</h3>${img}]]></description><Point><coordinates>${p.lon},${p.lat},${p.ele}</coordinates></Point></Placemark>`;
         });
-        const rotaXML = slice.length > 1 ? `<Placemark><name>Traçado - ${distTotal}km</name><styleUrl>#lineCyan</styleUrl><description><![CDATA[<div style="font-family:Arial; width:300px;"><h3 style="color:#1565C0;">Resumo</h3><p>Distância: <b>${distTotal} km</b></p><img src="${imgChart}" style="width:100%;"></div>]]></description><LineString><tessellate>1</tessellate><coordinates>${coords}</coordinates></LineString></Placemark>` : '';
-        const kml = `<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Rota CBA</name><Style id="lineCyan"><LineStyle><color>ffFFFF00</color><width>5</width></LineStyle></Style><Style id="iconAlert"><IconStyle><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/caution.png</href></Icon></IconStyle></Style><Style id="iconInfo"><IconStyle><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/blue-pushpin.png</href></Icon></IconStyle></Style>${rotaXML}<Folder><name>Ocorrências</name>${pointsXML}</Folder></Document></kml>`;
-        const blob = new Blob([kml], {type: 'application/vnd.google-earth.kml+xml'});
-        const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
-        link.download = `Rota_CBA_${distTotal}km.kml`; document.body.appendChild(link); link.click(); document.body.removeChild(link);
-    }
 
-    initMap();
+        const rotaXML = slice.length > 1 ? `
+        <Placemark>
+            <name>Traçado - ${distTotal}km</name>
+            <styleUrl>#lineCyan</styleUrl>
+            <description><![CDATA[<div style="font-family:Arial; width:300px;"><h3 style="color:#1565C0;">Resumo</h3><p>Distância: <b>${distTotal} km</b></p><img src="${imgChart}" style="width:100%;"></div>]]></description>
+            <LineString><tessellate>1</tessellate><coordinates>${coords}</coordinates></LineString>
+        </Placemark>` : '';
+
+        const kml = `<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Rota CBA</name><Style id="lineCyan"><LineStyle><color>ffFFFF00</color><width>5</width></LineStyle></Style><Style id="iconAlert"><IconStyle><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/caution.png</href></Icon></IconStyle></Style><Style id="iconInfo"><IconStyle><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/blue-pushpin.png</href></Icon></IconStyle></Style>${rotaXML}<Folder><name>Ocorrências</name>${pointsXML}</Folder></Document></kml>`;
+        
+        const blob = new Blob([kml], {type: 'application/vnd.google-earth.kml+xml'});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Rota_CBA_${distTotal}km.kml`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 </script>
 </body>
 </html>

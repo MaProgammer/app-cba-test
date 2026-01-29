@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#1565C0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>CBA Field Master</title>
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛰️</text></svg>">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* BASE & LAYOUT */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body { margin: 0; padding: 0; height: 100vh; width: 100vw; display: flex; flex-direction: column; background: #f0f2f5; overflow: hidden; }
+
+        /* HEADER */
+        header { 
+            background: #1565C0; color: white; height: 60px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 0 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;
+            padding-top: env(safe-area-inset-top); 
+        }
+        .app-title { font-weight: 700; font-size: 1rem; display: flex; flex-direction: column; line-height: 1.1; }
+        .app-subtitle { font-size: 0.65rem; opacity: 0.8; font-weight: 400; }
+        
+        .header-actions { display: flex; gap: 10px; }
+        .btn-header { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        
+        /* BOTÃO REC */
+        #btnRec { transition: all 0.3s; border: 1px solid rgba(255,255,255,0.3); }
+        #btnRec.recording { background: #d32f2f; color: white; animation: pulse 1.5s infinite; border: 1px solid white; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 82, 82, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 82, 82, 0); } }
+
+        #fileInput { display: none; }
+
+        /* LAYOUT PRINCIPAL */
+        #main-container { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        #map { flex: 1; width: 100%; background: #e5e3df; z-index: 1; position: relative; }
+        #map.crosshair { cursor: crosshair; }
+
+        /* BOTÃO "MEU LOCAL" (ESTILO GOOGLE MAPS) */
+        .fab-locate {
+            position: absolute;
+            bottom: 20px; right: 15px; /* Fica acima do painel de controle no mobile */
+            background: white; width: 50px; height: 50px;
+            border-radius: 50%; border: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            z-index: 1000; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.2s;
+        }
+        .fab-locate:active { background: #f0f0f0; }
+        .fab-locate svg { width: 24px; height: 24px; fill: #555; }
+
+        /* PAINEL INFERIOR */
+        #controls { 
+            height: 45dvh; min-height: 280px; background: white; 
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.1); border-radius: 15px 15px 0 0;
+            display: flex; flex-direction: column; z-index: 999; position: relative;
+        }
+
+        .panel-scroll { flex: 1; padding: 15px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        
+        .panel-footer {
+            flex-shrink: 0; padding: 10px 15px; background: white; border-top: 1px solid #eee;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom)); 
+            display: grid; grid-template-columns: 1fr 1fr 0.8fr; gap: 10px;
+        }
+
+        /* UI ELEMENTS */
+        .gps-status { text-align: center; font-size: 0.7rem; color: #d32f2f; font-weight: bold; height: 15px; margin-bottom: 5px; display: none; }
+        
+        .kpi-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; background: #f5f7f9; padding: 8px; border-radius: 8px; margin-bottom: 15px; }
+        .kpi-item { text-align: center; }
+        .kpi-val { font-size: 0.95rem; font-weight: 800; color: #333; display: block; }
+        .kpi-lbl { font-size: 0.6rem; color: #888; font-weight: 700; text-transform: uppercase; }
+
+        label { font-size: 0.7rem; font-weight: 700; color: #888; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        input[type=range] { width: 100%; margin: 8px 0; height: 4px; background: #ddd; border-radius: 2px; -webkit-appearance: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; background: #1565C0; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+
+        #pointList { list-style: none; padding: 0; margin: 0; }
+        #pointList li { font-size: 0.8rem; background: #fff; border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
+        .btn-del { color: #d32f2f; font-weight: bold; padding: 5px 15px; cursor: pointer; font-size: 1.2em; }
+
+        .btn-mode { padding: 12px 0; border-radius: 8px; border: none; font-weight: 700; font-size: 0.85rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; height: 50px; }
+        .mode-alert { background: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; }
+        .mode-alert.active { background: #e65100; color: white; border-color: #e65100; }
+        .mode-info { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+        .mode-info.active { background: #1565c0; color: white; border-color: #1565c0; }
+        .mode-save { background: #2e7d32; color: white; border: none; }
+        
+        .hint-text { text-align: center; font-size: 0.7rem; color: #888; margin-top: 5px; height: 14px; font-style: italic; }
+        .hidden { display: none; }
+
+        @media (min-width: 768px) {
+            #main-container { flex-direction: row; }
+            #controls { width: 350px; height: 100%; border-radius: 0; border-left: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="app-title">
+        <span>🛰️ CBA Master</span>
+        <span class="app-subtitle" id="statusHeader">Pronto para uso</span>
+    </div>
+    <div class="header-actions">
+        <button id="btnRec" class="btn-header" onclick="toggleRecording()">
+            <span>🔴</span> REC
+        </button>
+        <button class="btn-header" onclick="document.getElementById('fileInput').click()">
+            <span>📂</span> Abrir
+        </button>
+    </div>
+    <input type="file" id="fileInput" accept=".gpx">
+</header>
+
+<div id="main-container">
+    <div id="map">
+        <button class="fab-locate" onclick="locateMe()" title="Onde estou?">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+            </svg>
+        </button>
+    </div>
+    
+    <div id="controls">
+        <div class="panel-scroll">
+            <div class="gps-status" id="gpsMsg">Buscando sinal GPS...</div>
+            
+            <div class="kpi-grid">
+                <div class="kpi-item"><span class="kpi-val" id="valDist">0.0</span><span class="kpi-lbl">km</span></div>
+                <div class="kpi-item"><span class="kpi-val" id="valEle">0</span><span class="kpi-lbl">m (Up)</span></div>
+                <div class="kpi-item"><span class="kpi-val" id="valPts">0</span><span class="kpi-lbl">Pts</span></div>
+            </div>
+
+            <label>Recorte / Progresso</label>
+            <input type="range" id="sStart" min="0" value="0" disabled>
+            <input type="range" id="sEnd" min="0" value="100" disabled>
+
+            <div class="hint-text" id="modeMsg">...</div>
+            
+            <label style="margin-top:15px;">Ocorrências</label>
+            <ul id="pointList"></ul>
+            <div style="text-align:center; color:#ccc; font-size:0.7rem; margin-top:10px;" id="emptyMsg">Lista vazia</div>
+        </div>
+
+        <div class="panel-footer">
+            <button id="btnAlert" class="btn-mode mode-alert" onclick="toggleMode('alert')">
+                <span>⚠️</span> Alerta
+            </button>
+            <button id="btnInfo" class="btn-mode mode-info" onclick="toggleMode('info')">
+                <span>ℹ️</span> Info
+            </button>
+            <button class="btn-mode mode-save" onclick="downloadKML()">
+                <span>💾</span> Salvar
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="hidden">
+    <canvas id="chartCanvas" width="320" height="150"></canvas>
+    <input type="file" id="imgUpload" accept="image/*">
+</div>
+
+<script>
+    let map, activeLine, userMarker;
+    let gpxData = []; 
+    let customPoints = []; 
+    let currentMode = null; 
+    let tempPoint = null; 
+    
+    // Variáveis de Gravação
+    let isRecording = false;
+    let watchId = null;
+    let wakeLock = null;
+
+    // INICIALIZAÇÃO
+    function initMap() {
+        map = L.map('map', {zoomControl: false}).setView([-14.235, -51.925], 4);
+        L.control.zoom({position: 'topleft'}).addTo(map);
+        L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'] }).addTo(map);
+
+        activeLine = L.polyline([], {color: '#00FFFF', weight: 6, opacity: 0.8}).addTo(map);
+        
+        // Marcador da posição atual (Bola azul)
+        userMarker = L.circleMarker([0,0], {
+            radius: 8, fillColor: '#2962ff', color: '#fff', weight: 3, fillOpacity: 1
+        });
+        // Não adicionamos ao mapa ainda, só quando tiver GPS
+    }
+
+    // --- FUNÇÃO "ONDE ESTOU" (NOVA) ---
+    // --- FUNÇÃO DE DIAGNÓSTICO DO GPS ---
+    function locateMe() {
+        // 1. Verifica se o navegador suporta
+        if (!navigator.geolocation) {
+            return alert("ERRO: Seu navegador não tem suporte a GPS.");
+        }
+
+        alert("📡 Solicitando GPS... Aguarde."); // Feedback visual
+
+        const btn = document.querySelector('.fab-locate svg');
+        if(btn) btn.style.fill = '#2962ff';
+
+        navigator.geolocation.getCurrentPosition(
+            // SUCESSO
+            (pos) => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                const acc = pos.coords.accuracy;
+                
+                alert(`✅ SUCESSO!\nLat: ${lat}\nLon: ${lon}\nPrecisão: ${acc}m`);
+                
+                if(!map.hasLayer(userMarker)) userMarker.addTo(map);
+                userMarker.setLatLng([lat, lon]);
+                map.flyTo([lat, lon], 18);
+                if(btn) btn.style.fill = '#555';
+            },
+            // ERRO (AQUI ESTÁ O SEGREDO)
+            (err) => {
+                let msg = "";
+                if (err.code === 1) msg = "🚫 PERMISSÃO NEGADA!\nVocê bloqueou o site. Clique no cadeado 🔒 na barra de endereço e libere o acesso.";
+                else if (err.code === 2) msg = "📡 SINAL INDISPONÍVEL!\nLigue o GPS do celular ou vá para céu aberto.";
+                else if (err.code === 3) msg = "⏱️ TIMEOUT!\nO GPS demorou muito para responder.";
+                else msg = "❌ Erro desconhecido: " + err.message;
+                
+                alert(msg); // Mostra o erro na tela
+                if(btn) btn.style.fill = '#d32f2f'; // Fica vermelho
+            },
+            // CONFIGURAÇÕES
+            { 
+                enableHighAccuracy: true, 
+                timeout: 10000, 
+                maximumAge: 0 
+            }
+        );
+    }
+
+    // --- FUNÇÃO DE GRAVAÇÃO (TRACKER) ---
+    async function toggleRecording() {
+        const btn = document.getElementById('btnRec');
+        const statusHeader = document.getElementById('statusHeader');
+        
+        if (!isRecording) {
+            try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
+
+            if (confirm("Iniciar nova gravação? (Isso limpará o mapa atual)")) clearData();
+
+            isRecording = true;
+            btn.innerHTML = "<span>⏹️</span> PARAR";
+            btn.classList.add('recording');
+            statusHeader.innerText = "Gravando Rota...";
+            document.getElementById('gpsMsg').style.display = 'block';
+
+            if ("geolocation" in navigator) {
+                watchId = navigator.geolocation.watchPosition(successGPS, errorGPS, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
+            }
+        } else {
+            isRecording = false;
+            btn.innerHTML = "<span>🔴</span> REC";
+            btn.classList.remove('recording');
+            statusHeader.innerText = "Gravação Finalizada";
+            document.getElementById('gpsMsg').style.display = 'none';
+
+            if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+            if (wakeLock !== null) { wakeLock.release(); wakeLock = null; }
+            if(gpxData.length > 0) map.fitBounds(activeLine.getBounds());
+        }
+    }
+
+    function successGPS(position) {
+        document.getElementById('gpsMsg').style.display = 'none';
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        const ele = position.coords.altitude || 0;
+        const acc = position.coords.accuracy;
+
+        if(!map.hasLayer(userMarker)) userMarker.addTo(map);
+        userMarker.setLatLng([lat, lon]);
+        
+        if (gpxData.length === 0) map.setView([lat, lon], 18);
+        else map.panTo([lat, lon]);
+
+        if (acc > 50) return; // Ignora GPS ruim
+
+        let distTotal = 0;
+        if (gpxData.length > 0) {
+            const last = gpxData[gpxData.length - 1];
+            const d = calcDistance(last.lat, last.lon, lat, lon);
+            if (d < 0.003) return; // Ignora se moveu menos de 3m
+            distTotal = last.dist + d;
+        }
+
+        const newPoint = { lat, lon, ele, dist: distTotal };
+        gpxData.push(newPoint);
+        activeLine.addLatLng([lat, lon]);
+        updateUI();
+    }
+
+    function errorGPS(err) {
+        document.getElementById('gpsMsg').innerText = "Sinal GPS fraco!";
+        document.getElementById('gpsMsg').style.display = 'block';
+    }
+
+    function clearData() {
+        gpxData = []; customPoints = [];
+        activeLine.setLatLngs([]);
+        updateUI(); renderPoints();
+    }
+
+    // --- IMPORTAR GPX ---
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        if(isRecording) toggleRecording();
+        clearData();
+        document.getElementById('statusHeader').innerText = file.name;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
+            const trkpts = xmlDoc.getElementsByTagName("trkpt");
+            let distTotal = 0;
+            const latlngs = [];
+
+            for (let i = 0; i < trkpts.length; i++) {
+                const lat = parseFloat(trkpts[i].getAttribute("lat"));
+                const lon = parseFloat(trkpts[i].getAttribute("lon"));
+                const ele = parseFloat(trkpts[i].getElementsByTagName("ele")[0]?.textContent || 0);
+                if (i > 0) {
+                    const prev = gpxData[i-1];
+                    distTotal += calcDistance(prev.lat, prev.lon, lat, lon);
+                }
+                gpxData.push({lat, lon, ele, dist: distTotal});
+                latlngs.push([lat, lon]);
+            }
+            activeLine.setLatLngs(latlngs);
+            if (gpxData.length > 0) {
+                map.fitBounds(activeLine.getBounds(), {padding: [20, 20]});
+                updateUI();
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    function calcDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; 
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+    }
+
+    function updateUI() {
+        const sStart = document.getElementById('sStart');
+        const sEnd = document.getElementById('sEnd');
+        
+        if(sEnd.value == sEnd.max) {
+             sStart.max = gpxData.length - 1; sEnd.max = gpxData.length - 1; sEnd.value = gpxData.length - 1;
+        } else { sStart.max = gpxData.length - 1; sEnd.max = gpxData.length - 1; }
+        
+        if(sStart.disabled) { sStart.disabled = false; sEnd.disabled = false; }
+        updateMapFromSliders();
+    }
+
+    function updateMapFromSliders() {
+        if(gpxData.length === 0) return;
+        const i = parseInt(document.getElementById('sStart').value);
+        let j = parseInt(document.getElementById('sEnd').value);
+        if (i >= j) { j = i + 1; document.getElementById('sEnd').value = j; }
+        
+        const slice = gpxData.slice(i, j + 1);
+        const dist = slice[slice.length-1].dist - slice[0].dist;
+        let eleGain = 0;
+        for(let k=1; k < slice.length; k++) { if(slice[k].ele > slice[k-1].ele) eleGain += slice[k].ele - slice[k-1].ele; }
+
+        document.getElementById('valDist').innerText = dist.toFixed(2);
+        document.getElementById('valEle').innerText = eleGain.toFixed(0);
+        document.getElementById('valPts').innerText = slice.length;
+        
+        activeLine.setLatLngs(slice.map(p => [p.lat, p.lon]));
+    }
+
+    document.getElementById('sStart').addEventListener('input', updateMapFromSliders);
+    document.getElementById('sEnd').addEventListener('input', updateMapFromSliders);
+
+    function toggleMode(mode) {
+        const btnAlert = document.getElementById('btnAlert');
+        const btnInfo = document.getElementById('btnInfo');
+        const msg = document.getElementById('modeMsg');
+        
+        if (currentMode === mode) {
+            currentMode = null;
+            btnAlert.classList.remove('active'); btnInfo.classList.remove('active');
+            msg.innerText = "...";
+            L.DomUtil.removeClass(map.getContainer(), 'leaflet-crosshair');
+        } else {
+            currentMode = mode;
+            L.DomUtil.addClass(map.getContainer(), 'leaflet-crosshair');
+            if(mode === 'alert') { btnAlert.classList.add('active'); btnInfo.classList.remove('active'); msg.innerText = "Toque no mapa para PERIGO ⚠️"; }
+            else { btnInfo.classList.add('active'); btnAlert.classList.remove('active'); msg.innerText = "Toque no mapa para INFO ℹ️"; }
+        }
+    }
+
+    initMap();
+    map.on('click', function(e) {
+        if (!currentMode) return;
+        let target = null;
+
+        if (gpxData.length > 0) {
+            let nearest = null; let minDist = Infinity;
+            for (const p of gpxData) {
+                const d = Math.pow(p.lat - e.latlng.lat, 2) + Math.pow(p.lon - e.latlng.lng, 2);
+                if (d < minDist) { minDist = d; nearest = p; }
+            }
+            target = nearest;
+        } else {
+            target = { lat: e.latlng.lat, lon: e.latlng.lng, ele: 0, dist: 0 };
+        }
+
+        if (target) {
+            const label = prompt("Descrição:", currentMode === 'alert' ? "Buraco" : "Nota");
+            if (label) {
+                tempPoint = { ...target, label: label, type: currentMode, image: null };
+                if (confirm("Adicionar foto?")) document.getElementById('imgUpload').click();
+                else addPoint(tempPoint);
+            }
+        }
+        toggleMode(currentMode);
+    });
+
+    document.getElementById('imgUpload').addEventListener('change', function(e) {
+        if (this.files && this.files[0] && tempPoint) {
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                resizeImage(evt.target.result, function(res) { tempPoint.image = res; addPoint(tempPoint); });
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    function resizeImage(base64Str, callback) {
+        const img = new Image();
+        img.src = base64Str;
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const MAX_W = 600; const scale = MAX_W / img.width;
+            canvas.width = MAX_W; canvas.height = img.height * scale;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            callback(canvas.toDataURL('image/jpeg', 0.6));
+        }
+    }
+
+    let markersLayer = L.layerGroup().addTo(map);
+    function addPoint(p) { customPoints.push(p); renderPoints(); }
+    function removePoint(i) { customPoints.splice(i, 1); renderPoints(); }
+
+    function renderPoints() {
+        const list = document.getElementById('pointList'); list.innerHTML = '';
+        markersLayer.clearLayers();
+        if(customPoints.length > 0) document.getElementById('emptyMsg').style.display = 'none';
+        else document.getElementById('emptyMsg').style.display = 'block';
+
+        customPoints.forEach((p, idx) => {
+            const iconChar = p.type === 'alert' ? '⚠️' : 'ℹ️';
+            const imgChar = p.image ? '📷' : '';
+            list.innerHTML += `<li><span>${iconChar} ${p.label} ${imgChar}</span><span class="btn-del" onclick="removePoint(${idx})">✕</span></li>`;
+            const color = p.type === 'alert' ? '#ef6c00' : '#1565c0';
+            const icon = L.divIcon({ className: 'c-pin', html: `<div style="background:${color};width:16px;height:16px;border:2px solid white;border-radius:50%;box-shadow:0 0 4px black;"></div>` });
+            L.marker([p.lat, p.lon], {icon: icon}).addTo(markersLayer);
+        });
+    }
+
+    async function downloadKML() {
+        if (gpxData.length === 0 && customPoints.length === 0) return alert("Nada para salvar.");
+        
+        const i = parseInt(document.getElementById('sStart').value);
+        const j = parseInt(document.getElementById('sEnd').value);
+        const slice = gpxData.slice(i, j + 1);
+
+        let imgChart = '';
+        if(slice.length > 1) {
+            const ctx = document.getElementById('chartCanvas').getContext('2d');
+            ctx.clearRect(0,0,320,150);
+            if(window.myChart) window.myChart.destroy();
+            window.myChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: slice.map(p => p.dist.toFixed(1)), datasets: [{ data: slice.map(p => p.ele), borderColor: '#1565C0', backgroundColor: 'rgba(33,150,243,0.2)', borderWidth: 2, fill: true, pointRadius: 0 }] },
+                options: { animation: false, responsive: false, scales: {x:{display:false}, y:{ticks:{font:{size:10}}}}, plugins: {legend:{display:false}} }
+            });
+            await new Promise(r => setTimeout(r, 200));
+            imgChart = document.getElementById('chartCanvas').toDataURL('image/png');
+        }
+
+        const coords = slice.map(p => `${p.lon},${p.lat},${p.ele}`).join(' ');
+        const distTotal = slice.length > 0 ? (slice[slice.length-1].dist - slice[0].dist).toFixed(2) : "0.00";
+        
+        let pointsXML = '';
+        customPoints.forEach(p => {
+            const style = p.type === 'alert' ? 'iconAlert' : 'iconInfo';
+            const img = p.image ? `<br><img src="${p.image}" style="width:250px; border:1px solid #ccc;">` : '';
+            pointsXML += `<Placemark><name>${p.label}</name><styleUrl>#${style}</styleUrl><description><![CDATA[<h3>${p.label}</h3>${img}]]></description><Point><coordinates>${p.lon},${p.lat},${p.ele}</coordinates></Point></Placemark>`;
+        });
+
+        const rotaXML = slice.length > 1 ? `
+        <Placemark>
+            <name>Traçado - ${distTotal}km</name>
+            <styleUrl>#lineCyan</styleUrl>
+            <description><![CDATA[<div style="font-family:Arial; width:300px;"><h3 style="color:#1565C0;">Resumo</h3><p>Distância: <b>${distTotal} km</b></p><img src="${imgChart}" style="width:100%;"></div>]]></description>
+            <LineString><tessellate>1</tessellate><coordinates>${coords}</coordinates></LineString>
+        </Placemark>` : '';
+
+        const kml = `<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Rota CBA</name><Style id="lineCyan"><LineStyle><color>ffFFFF00</color><width>5</width></LineStyle></Style><Style id="iconAlert"><IconStyle><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/caution.png</href></Icon></IconStyle></Style><Style id="iconInfo"><IconStyle><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/blue-pushpin.png</href></Icon></IconStyle></Style>${rotaXML}<Folder><name>Ocorrências</name>${pointsXML}</Folder></Document></kml>`;
+        
+        const blob = new Blob([kml], {type: 'application/vnd.google-earth.kml+xml'});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Rota_CBA_${distTotal}km.kml`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+</body>
+</html>

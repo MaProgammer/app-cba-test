@@ -14,7 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        /* --- ESTILO VISUAL "TOP" --- */
+        /* --- ESTILO VISUAL "TOP" (LIMPO) --- */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         body { margin: 0; padding: 0; height: 100dvh; width: 100vw; display: flex; flex-direction: column; background: #f0f2f5; overflow: hidden; }
 
@@ -52,9 +52,9 @@
         .fab-locate:active { transform: scale(0.95); }
         .fab-locate svg { width: 26px; height: 26px; fill: #555; }
 
-        /* PAINEL DE CONTROLE (Visual Card) */
+        /* PAINEL DE CONTROLE */
         #controls { 
-            max-height: 50dvh; /* Altura máxima */
+            /* Altura ajustada automaticamente */
             background: #f2f4f8; 
             box-shadow: 0 -4px 20px rgba(0,0,0,0.15); border-radius: 20px 20px 0 0;
             display: flex; flex-direction: column; z-index: 999; position: relative;
@@ -79,21 +79,6 @@
         .slider-label { font-size: 0.7rem; font-weight: bold; color: #555; width: 45px; }
         input[type=range] { flex: 1; height: 6px; background: #e0e0e0; border-radius: 3px; -webkit-appearance: none; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; background: #1565C0; border-radius: 50%; box-shadow: 0 1px 4px rgba(0,0,0,0.3); border: 2px solid white; }
-
-        /* LISTA DE PONTOS (Estilizada) */
-        .list-label { font-size: 0.75rem; font-weight: 700; color: #666; text-transform: uppercase; margin: 12px 0 8px 4px; display: block; }
-        #pointList { list-style: none; padding: 0; margin: 0; padding-bottom: 10px; }
-        #pointList li { 
-            background: white; border-radius: 8px; margin-bottom: 8px; padding: 10px 12px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 0.9rem;
-        }
-        #pointList li span { display: flex; align-items: center; gap: 8px; font-weight: 500; color: #333; }
-        .btn-del { 
-            color: #d32f2f; background: #ffebee; width: 28px; height: 28px; 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 14px; font-weight: bold;
-        }
 
         /* FOOTER (BOTÕES) */
         .panel-footer {
@@ -132,7 +117,6 @@
         #modeMsg.visible { opacity: 1; bottom: 80px; }
         
         #gpsMsg { background: #ffebee; color: #c62828; text-align: center; font-size: 0.75rem; padding: 6px; font-weight: 700; display: none; }
-        #emptyMsg { text-align:center; color:#999; font-size:0.8rem; margin:10px 0; font-style: italic; }
 
         .hidden { display: none; }
         #fileInput { display: none; }
@@ -140,7 +124,7 @@
         /* Desktop */
         @media (min-width: 768px) {
             #main-container { flex-direction: row; }
-            #controls { width: 380px; height: 100%; border-radius: 0; border-left: 1px solid #ddd; max-height: 100%; }
+            #controls { width: 380px; height: auto; min-height: auto; border-radius: 0; border-left: 1px solid #ddd; }
             .fab-locate { bottom: 24px; right: 24px; }
         }
     </style>
@@ -193,11 +177,7 @@
                     </div>
                 </div>
             </div>
-
-            <span class="list-label">Lista de Ocorrências</span>
-            <div id="emptyMsg">Nenhuma ocorrência registrada</div>
-            <ul id="pointList"></ul>
-        </div>
+            </div>
 
         <div class="panel-footer">
             <button id="btnAlert" class="btn-action btn-alert" onclick="toggleMode('alert')">
@@ -219,7 +199,7 @@
 </div>
 
 <script>
-    // --- LÓGICA DO SEU CÓDIGO FUNCIONAL ---
+    // --- LÓGICA E MAPA ---
     let map, activeLine, userMarker;
     let gpxData = []; 
     let customPoints = []; 
@@ -232,7 +212,7 @@
 
     function initMap() {
         map = L.map('map', {zoomControl: false}).setView([-14.235, -51.925], 4);
-        // Usa HTTPS para evitar bloqueio em servidores seguros, mas mantém a lógica do seu mapa híbrido
+        // Link Híbrido do Google seguro
         L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { 
             maxZoom: 20, 
             subdomains: ['mt0','mt1','mt2','mt3'],
@@ -415,14 +395,14 @@
         if (currentMode === mode) {
             currentMode = null;
             btnAlert.classList.remove('active'); btnInfo.classList.remove('active');
-            msg.classList.remove('visible'); // Oculta a mensagem
+            msg.classList.remove('visible'); 
             L.DomUtil.removeClass(map.getContainer(), 'leaflet-crosshair');
         } else {
             currentMode = mode;
             L.DomUtil.addClass(map.getContainer(), 'leaflet-crosshair');
             if(mode === 'alert') { btnAlert.classList.add('active'); btnInfo.classList.remove('active'); msg.innerText = "Toque na rota para PERIGO ⚠️"; }
             else { btnInfo.classList.add('active'); btnAlert.classList.remove('active'); msg.innerText = "Toque na rota para INFO ℹ️"; }
-            msg.classList.add('visible'); // Mostra a mensagem
+            msg.classList.add('visible'); 
         }
     }
 
@@ -481,20 +461,15 @@
     function removePoint(i) { customPoints.splice(i, 1); renderPoints(); }
 
     function renderPoints() {
-        const list = document.getElementById('pointList'); list.innerHTML = '';
+        // Agora só renderizamos no mapa, sem lista
         markersLayer.clearLayers();
-        if(customPoints.length > 0) document.getElementById('emptyMsg').style.display = 'none';
-        else document.getElementById('emptyMsg').style.display = 'block';
-
         customPoints.forEach((p, idx) => {
-            const iconChar = p.type === 'alert' ? '⚠️' : 'ℹ️';
-            const imgChar = p.image ? '📷' : '';
-            // HTML da lista bonitinho
-            list.innerHTML += `<li><span>${iconChar} ${p.label} ${imgChar}</span><div class="btn-del" onclick="removePoint(${idx})">✕</div></li>`;
-            
             const color = p.type === 'alert' ? '#ef6c00' : '#1565c0';
             const icon = L.divIcon({ className: 'c-pin', html: `<div style="background:${color};width:16px;height:16px;border:2px solid white;border-radius:50%;box-shadow:0 0 4px black;"></div>` });
-            L.marker([p.lat, p.lon], {icon: icon}).addTo(markersLayer);
+            const m = L.marker([p.lat, p.lon], {icon: icon}).addTo(markersLayer);
+            
+            // Adicionei botão de excluir no balãozinho do mapa, já que não temos mais lista
+            m.bindPopup(`<b>${p.label}</b><br><button onclick="removePoint(${idx})" style="color:red;font-weight:bold;border:1px solid #ddd;background:white;padding:4px;margin-top:4px;cursor:pointer;">Excluir</button>`);
         });
     }
 

@@ -20,19 +20,19 @@
 
         /* HEADER */
         header { 
-            background: #1565C0; color: white; height: 56px; flex-shrink: 0;
+            background: #1565C0; color: white; height: 50px; flex-shrink: 0;
             display: flex; align-items: center; justify-content: space-between; 
-            padding: 0 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 1000;
+            padding: 0 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 1000;
             padding-top: env(safe-area-inset-top); 
         }
-        .app-title { font-weight: 700; font-size: 1.1rem; line-height: 1.2; display: flex; flex-direction: column; }
-        .app-subtitle { font-size: 0.7rem; opacity: 0.8; font-weight: 400; }
+        .app-title { font-weight: 700; font-size: 1rem; line-height: 1.2; display: flex; flex-direction: column; }
+        .app-subtitle { font-size: 0.65rem; opacity: 0.8; font-weight: 400; }
         .header-actions { display: flex; gap: 8px; }
         .btn-header { 
             background: rgba(255,255,255,0.15); border: none; color: white; 
-            padding: 0 12px; height: 32px; border-radius: 16px; 
-            font-size: 0.8rem; font-weight: 600; cursor: pointer; 
-            display: flex; align-items: center; gap: 6px; transition: 0.2s;
+            padding: 0 10px; height: 28px; border-radius: 14px; 
+            font-size: 0.75rem; font-weight: 600; cursor: pointer; 
+            display: flex; align-items: center; gap: 4px; transition: 0.2s;
         }
         .btn-header:active { background: rgba(255,255,255,0.3); }
 
@@ -41,79 +41,77 @@
         #map { flex: 1; width: 100%; background: #e5e3df; z-index: 1; }
         
         .fab-locate {
-            position: absolute; bottom: 24px; right: 16px;
-            background: white; width: 52px; height: 52px; border-radius: 50%;
+            position: absolute; bottom: 20px; right: 16px;
+            background: white; width: 48px; height: 48px; border-radius: 50%;
             border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             z-index: 900; display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: transform 0.2s;
         }
         .fab-locate:active { transform: scale(0.95); }
-        .fab-locate svg { width: 26px; height: 26px; fill: #555; }
+        .fab-locate svg { width: 24px; height: 24px; fill: #555; }
 
-        /* PAINEL DE CONTROLE */
+        /* PAINEL DE CONTROLE COMPACTO */
         #controls { 
             background: #f2f4f8; 
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.15); border-radius: 20px 20px 0 0;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.1); border-radius: 16px 16px 0 0;
             display: flex; flex-direction: column; z-index: 999; position: relative;
         }
 
-        .panel-scroll { flex: 1; padding: 16px 16px 0 16px; overflow-y: auto; }
+        .panel-scroll { flex: 1; padding: 12px 12px 0 12px; overflow-y: auto; }
 
-        /* KPI CARD */
+        /* KPI CARD (REDUZIDO) */
         .data-card {
-            background: white; border-radius: 16px; padding: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 12px;
+            background: white; border-radius: 12px; padding: 10px; /* Padding reduzido */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 8px;
         }
-        .kpi-row { display: flex; justify-content: space-between; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0; }
+        .kpi-row { 
+            display: flex; justify-content: space-between; 
+            margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; 
+        }
         .kpi-item { text-align: center; flex: 1; }
-        .kpi-val { font-size: 1.25rem; font-weight: 800; color: #1565C0; display: block; line-height: 1; }
-        .kpi-lbl { font-size: 0.7rem; color: #888; font-weight: 700; text-transform: uppercase; margin-top: 4px; display: block; }
+        
+        /* LETRAS MENORES */
+        .kpi-val { font-size: 1rem; font-weight: 800; color: #1565C0; display: block; line-height: 1; }
+        .kpi-lbl { font-size: 0.6rem; color: #888; font-weight: 700; text-transform: uppercase; margin-top: 2px; display: block; }
 
-        /* --- SLIDER DUPLO (INICIO E FIM NA MESMA LINHA) --- */
-        .range-container { position: relative; width: 100%; height: 40px; margin-top: 10px; }
+        /* SLIDER DUPLO */
+        .range-container { position: relative; width: 100%; height: 30px; margin-top: 5px; }
         
         .slider-track-bg { 
-            position: absolute; top: 50%; left: 0; width: 100%; height: 6px; 
-            background: #e0e0e0; border-radius: 3px; transform: translateY(-50%); z-index: 1; 
+            position: absolute; top: 50%; left: 0; width: 100%; height: 4px; 
+            background: #e0e0e0; border-radius: 2px; transform: translateY(-50%); z-index: 1; 
         }
         
         .slider-track-fill { 
-            position: absolute; top: 50%; height: 6px; 
+            position: absolute; top: 50%; height: 4px; 
             background: #1565C0; z-index: 2; transform: translateY(-50%);
-            border-radius: 3px; pointer-events: none;
+            border-radius: 2px; pointer-events: none;
         }
 
         input[type=range] {
             position: absolute; top: 50%; left: 0; width: 100%; 
-            -webkit-appearance: none; pointer-events: none; /* Importante: deixa clicar no de baixo */
+            -webkit-appearance: none; pointer-events: none;
             background: none; transform: translateY(-50%); z-index: 3; margin: 0;
         }
 
-        /* Thumb (Botão) - Chrome/Safari */
+        /* Botão do Slider menor */
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; pointer-events: auto; /* Reativa o clique no botão */
-            width: 28px; height: 28px; border-radius: 50%; 
-            background: #1565C0; border: 3px solid white; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3); cursor: pointer;
+            -webkit-appearance: none; pointer-events: auto;
+            width: 22px; height: 22px; border-radius: 50%; 
+            background: #1565C0; border: 2px solid white; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3); cursor: pointer;
         }
         
-        /* Thumb (Botão) - Firefox */
-        input[type=range]::-moz-range-thumb {
-            pointer-events: auto; width: 28px; height: 28px; border-radius: 50%; 
-            background: #1565C0; border: 3px solid white; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3); cursor: pointer; border: none;
-        }
-
-        .range-labels { display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: bold; color: #666; margin-bottom: -10px; }
+        .range-labels { display: flex; justify-content: space-between; font-size: 0.6rem; font-weight: bold; color: #888; margin-bottom: -5px; }
 
         /* FOOTER */
         .panel-footer {
-            flex-shrink: 0; padding: 12px 16px; background: #f2f4f8; 
-            padding-bottom: calc(12px + env(safe-area-inset-bottom));
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
+            flex-shrink: 0; padding: 10px 12px; background: #f2f4f8; 
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
         }
         .btn-action {
-            height: 50px; border-radius: 12px; border: none; font-weight: 700; font-size: 0.85rem;
+            height: 44px; border-radius: 10px; border: none; font-weight: 700; font-size: 0.8rem;
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
             cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.1s;
         }
@@ -124,7 +122,6 @@
         .btn-info.active { background: #1565c0; color: white; border: none; }
         .btn-save { background: #2e7d32; color: white; grid-column: 3; }
 
-        /* Animações e Mensagens */
         #btnRec.recording { background: #d32f2f; color: white; animation: pulse 1.5s infinite; border: 1px solid white; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(211, 47, 47, 0); } 100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); } }
         
@@ -136,13 +133,13 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 1001;
         }
         #modeMsg.visible { opacity: 1; bottom: 80px; }
-        #gpsMsg { background: #ffebee; color: #c62828; text-align: center; font-size: 0.75rem; padding: 6px; font-weight: 700; display: none; }
+        #gpsMsg { background: #ffebee; color: #c62828; text-align: center; font-size: 0.75rem; padding: 4px; font-weight: 700; display: none; }
         .hidden { display: none; }
         #fileInput { display: none; }
         
         @media (min-width: 768px) {
             #main-container { flex-direction: row; }
-            #controls { width: 380px; height: auto; border-radius: 0; border-left: 1px solid #ddd; }
+            #controls { width: 350px; height: auto; border-radius: 0; border-left: 1px solid #ddd; }
             .fab-locate { bottom: 24px; right: 24px; }
         }
     </style>
@@ -152,7 +149,7 @@
 <header>
     <div class="app-title">
         <span>🛰️ CBA Master</span>
-        <span class="app-subtitle" id="statusHeader">Pronto para uso</span>
+        <span class="app-subtitle" id="statusHeader">Pronto</span>
     </div>
     <div class="header-actions">
         <button id="btnRec" class="btn-header" onclick="toggleRecording()">
@@ -194,7 +191,6 @@
                     <input type="range" id="sStart" min="0" value="0" step="1">
                     <input type="range" id="sEnd" min="0" value="100" step="1">
                 </div>
-                <div style="text-align: center; font-size: 0.7rem; color: #999; margin-top: 5px;">Ajuste o recorte da rota</div>
             </div>
         </div>
 
@@ -224,9 +220,10 @@
 
     function initMap() {
         map = L.map('map', {zoomControl: false}).setView([-14.235, -51.925], 4);
-        L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { 
+        
+        // MAPA FIXADO NO MT1 (GOOGLE SATELLITE HYBRID)
+        L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { 
             maxZoom: 20, 
-            subdomains: ['mt0','mt1','mt2','mt3'],
             attribution: '© Google'
         }).addTo(map);
 
@@ -321,15 +318,11 @@
             }
             activeLine.setLatLngs(latlngs);
             
-            // --- MELHORIA 1: AUTO RANGE NO CARREGAMENTO ---
             if (gpxData.length > 0) {
                 const sStart = document.getElementById('sStart');
                 const sEnd = document.getElementById('sEnd');
-                // Define limites
                 sStart.max = gpxData.length - 1; sEnd.max = gpxData.length - 1;
-                // Define valores para cobrir TUDO
                 sStart.value = 0; sEnd.value = gpxData.length - 1;
-                // Atualiza mapa e UI
                 map.fitBounds(activeLine.getBounds(), {padding: [20, 20]});
                 updateUI();
             }
@@ -347,18 +340,14 @@
         const sStart = document.getElementById('sStart'); const sEnd = document.getElementById('sEnd');
         const trackFill = document.getElementById('trackFill');
 
-        // Atualiza max se estiver gravando
         if (isRecording) {
             sStart.max = gpxData.length - 1; sEnd.max = gpxData.length - 1;
-            if(sEnd.value == (gpxData.length - 2)) sEnd.value = gpxData.length - 1; // Auto-scroll fim
+            if(sEnd.value == (gpxData.length - 2)) sEnd.value = gpxData.length - 1;
         }
 
         let i = parseInt(sStart.value); let j = parseInt(sEnd.value);
-        
-        // Garante que inicio não passe o fim
         if (i >= j) { j = i; sEnd.value = j; }
 
-        // --- MELHORIA 2: VISUAL DO SLIDER DUPLO ---
         if (gpxData.length > 0) {
             const max = parseInt(sEnd.max);
             const perStart = (i / max) * 100;

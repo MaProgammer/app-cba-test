@@ -57,19 +57,24 @@
         }
         .fab-locate svg { width: 24px; height: 24px; fill: #555; }
 
-        /* --- PAINEL DE CONTROLE (NOVO LAYOUT) --- */
+        /* --- PAINEL DE CONTROLE (COMPACTO) --- */
         #controls { 
-            height: 42dvh; min-height: 260px; background: #f2f4f8; 
+            /* Altura automática baseada no conteúdo, mas com limite */
+            max-height: 45dvh; 
+            background: #f2f4f8; 
             box-shadow: 0 -4px 16px rgba(0,0,0,0.15); border-radius: 16px 16px 0 0;
             display: flex; flex-direction: column; z-index: 999; position: relative;
         }
 
-        .panel-scroll { flex: 1; padding: 12px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .panel-scroll { 
+            flex: 1; padding: 12px 12px 0 12px; 
+            overflow-y: auto; -webkit-overflow-scrolling: touch; 
+        }
 
-        /* CARTÃO DE DADOS (AGRUPADO) */
+        /* CARTÃO DE DADOS */
         .data-card {
             background: white; border-radius: 12px; padding: 12px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 0; /* Removido margem extra */
         }
 
         .kpi-row { display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
@@ -83,42 +88,37 @@
         input[type=range] { flex: 1; height: 4px; background: #e0e0e0; border-radius: 2px; -webkit-appearance: none; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: #1565C0; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
-        /* LISTA COMPACTA */
-        .list-header { font-size: 0.75rem; font-weight: 700; color: #666; margin: 0 0 8px 4px; text-transform: uppercase; }
-        #pointList { list-style: none; padding: 0; margin: 0; }
-        #pointList li { 
-            background: white; border-radius: 8px; padding: 10px 12px; margin-bottom: 6px; 
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-size: 0.85rem; font-weight: 500;
-        }
-        .btn-del { color: #e57373; font-weight: bold; padding: 4px 8px; font-size: 1.2rem; margin-right: -8px; }
-
         /* --- FOOTER (BOTÕES) --- */
         .panel-footer {
-            flex-shrink: 0; padding: 12px 16px; background: white; 
+            flex-shrink: 0; padding: 12px 16px; background: #f2f4f8; /* Mesma cor do fundo do painel */
             padding-bottom: calc(12px + env(safe-area-inset-bottom));
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
             display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
         }
 
         .btn-action {
             height: 48px; border-radius: 10px; border: none; font-weight: 700; font-size: 0.85rem;
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-            cursor: pointer; transition: transform 0.1s;
+            cursor: pointer; transition: transform 0.1s; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .btn-action:active { transform: scale(0.96); }
 
         .btn-alert { background: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; }
-        .btn-alert.active { background: #e65100; color: white; border: none; }
+        .btn-alert.active { background: #e65100; color: white; border: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
         
         .btn-info { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
-        .btn-info.active { background: #1565c0; color: white; border: none; }
+        .btn-info.active { background: #1565c0; color: white; border: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
         
         .btn-save { background: #2e7d32; color: white; grid-column: 3; }
 
         /* Mensagens flutuantes */
-        #modeMsg { position: absolute; bottom: 85px; left: 0; right: 0; text-align: center; font-size: 0.75rem; color: #1565C0; font-weight: 600; background: rgba(255,255,255,0.9); padding: 4px; pointer-events: none; opacity: 0; transition: opacity 0.2s; }
-        #modeMsg.visible { opacity: 1; }
+        #modeMsg { 
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); 
+            font-size: 0.8rem; color: #1565C0; font-weight: 700; 
+            background: rgba(255,255,255,0.95); padding: 8px 16px; 
+            border-radius: 20px; pointer-events: none; opacity: 0; transition: opacity 0.2s; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 1001;
+        }
+        #modeMsg.visible { opacity: 1; bottom: 80px; /* Acima dos controles se aberto, ou ajustado via JS */ }
         
         #gpsMsg { background: #ffebee; color: #c62828; text-align: center; font-size: 0.75rem; padding: 4px; font-weight: 600; display: none; }
 
@@ -127,7 +127,7 @@
         /* Desktop fix */
         @media (min-width: 768px) {
             #main-container { flex-direction: row; }
-            #controls { width: 360px; height: 100%; border-radius: 0; border-left: 1px solid #ddd; }
+            #controls { width: 360px; height: 100%; border-radius: 0; border-left: 1px solid #ddd; max-height: 100%; }
         }
     </style>
 </head>
@@ -154,7 +154,7 @@
         <button class="fab-locate" onclick="locateMe()" title="Onde estou?">
             <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
         </button>
-        <div id="modeMsg">Toque no mapa para adicionar ponto...</div>
+        <div id="modeMsg">Toque no mapa para adicionar...</div>
     </div>
     
     <div id="controls">
@@ -179,10 +179,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="list-header">Ocorrências / Pontos</div>
-            <ul id="pointList"></ul>
-            <div style="text-align:center; color:#999; font-size:0.75rem; margin-top:10px; font-style:italic;" id="emptyMsg">Nenhum ponto registrado</div>
         </div>
 
         <div class="panel-footer">
@@ -205,7 +201,7 @@
 </div>
 
 <script>
-    // --- LÓGICA DO APP (MESMA LÓGICA, NOVO LAYOUT) ---
+    // --- LÓGICA DO APP ---
     let map, activeLine, userMarker;
     let gpxData = []; 
     let customPoints = []; 
@@ -216,8 +212,15 @@
     let wakeLock = null;
 
     function initMap() {
+        // MAPA GOOGLE HÍBRIDO (HTTPS)
         map = L.map('map', {zoomControl: false}).setView([-14.235, -51.925], 4);
-        L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'] }).addTo(map);
+        
+        // Link seguro HTTPS do Google Hybrid
+        L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { 
+            maxZoom: 20, 
+            attribution: '© Google' 
+        }).addTo(map);
+
         activeLine = L.polyline([], {color: '#00FFFF', weight: 6, opacity: 0.8}).addTo(map);
         userMarker = L.circleMarker([0,0], { radius: 8, fillColor: '#2962ff', color: '#fff', weight: 3, fillOpacity: 1 });
     }
@@ -415,18 +418,19 @@
 
     let markersLayer = L.layerGroup().addTo(map);
     function addPoint(p) { customPoints.push(p); renderPoints(); }
+    
+    // REMOVIDO DA UI, MAS LÓGICA MANTIDA PARA MARCADORES
     function removePoint(i) { customPoints.splice(i, 1); renderPoints(); }
 
     function renderPoints() {
-        const list = document.getElementById('pointList'); list.innerHTML = ''; markersLayer.clearLayers();
-        if(customPoints.length > 0) document.getElementById('emptyMsg').style.display = 'none';
-        else document.getElementById('emptyMsg').style.display = 'block';
+        markersLayer.clearLayers();
         customPoints.forEach((p, idx) => {
-            const iconChar = p.type === 'alert' ? '⚠️' : 'ℹ️'; const imgChar = p.image ? '📷' : '';
-            list.innerHTML += `<li><span>${iconChar} ${p.label} ${imgChar}</span><span class="btn-del" onclick="removePoint(${idx})">×</span></li>`;
             const color = p.type === 'alert' ? '#ef6c00' : '#1565c0';
             const icon = L.divIcon({ className: 'c-pin', html: `<div style="background:${color};width:16px;height:16px;border:2px solid white;border-radius:50%;box-shadow:0 0 4px black;"></div>` });
-            L.marker([p.lat, p.lon], {icon: icon}).addTo(markersLayer);
+            const m = L.marker([p.lat, p.lon], {icon: icon}).addTo(markersLayer);
+            
+            // Permite deletar clicando no marcador
+            m.bindPopup(`<b>${p.label}</b><br><button onclick="removePoint(${idx})" style="color:red;font-weight:bold;border:1px solid #ddd;background:white;padding:4px;margin-top:4px;">Excluir</button>`);
         });
     }
 

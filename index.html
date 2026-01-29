@@ -14,11 +14,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        /* --- BASE --- */
+        /* --- ESTILOS GERAIS (LAYOUT TOP) --- */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         body { margin: 0; padding: 0; height: 100dvh; width: 100vw; display: flex; flex-direction: column; background: #f0f2f5; overflow: hidden; }
 
-        /* --- HEADER --- */
+        /* --- CABEÇALHO --- */
         header { 
             background: #1565C0; color: white; height: 56px; flex-shrink: 0;
             display: flex; align-items: center; justify-content: space-between; 
@@ -37,17 +37,17 @@
         }
         .btn-header:active { background: rgba(255,255,255,0.3); }
 
-        /* REC Button Animation */
+        /* Animação do Botão REC */
         #btnRec.recording { background: #d32f2f; color: white; animation: pulse 1.5s infinite; border: 1px solid white; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(211, 47, 47, 0); } 100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); } }
 
         #fileInput { display: none; }
 
-        /* --- MAPA --- */
+        /* --- MAPA E ÁREA CENTRAL --- */
         #main-container { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
         #map { flex: 1; width: 100%; background: #e5e3df; z-index: 1; }
         
-        /* Botão Localizar Flutuante */
+        /* Botão Flutuante de Localização */
         .fab-locate {
             position: absolute; bottom: 16px; right: 16px;
             background: white; width: 48px; height: 48px; border-radius: 50%;
@@ -57,9 +57,8 @@
         }
         .fab-locate svg { width: 24px; height: 24px; fill: #555; }
 
-        /* --- PAINEL DE CONTROLE (COMPACTO) --- */
+        /* --- PAINEL DE CONTROLE (CSS DO OUTRO CÓDIGO) --- */
         #controls { 
-            /* Altura automática baseada no conteúdo, mas com limite */
             max-height: 45dvh; 
             background: #f2f4f8; 
             box-shadow: 0 -4px 16px rgba(0,0,0,0.15); border-radius: 16px 16px 0 0;
@@ -71,7 +70,6 @@
             overflow-y: auto; -webkit-overflow-scrolling: touch; 
         }
 
-        /* CARTÃO DE DADOS */
         .data-card {
             background: white; border-radius: 12px; padding: 12px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 0; 
@@ -88,7 +86,7 @@
         input[type=range] { flex: 1; height: 4px; background: #e0e0e0; border-radius: 2px; -webkit-appearance: none; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: #1565C0; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
-        /* --- FOOTER (BOTÕES) --- */
+        /* --- RODAPÉ (BOTÕES DE AÇÃO) --- */
         .panel-footer {
             flex-shrink: 0; padding: 12px 16px; background: #f2f4f8; 
             padding-bottom: calc(12px + env(safe-area-inset-bottom));
@@ -110,7 +108,7 @@
         
         .btn-save { background: #2e7d32; color: white; grid-column: 3; }
 
-        /* Mensagens flutuantes */
+        /* Mensagens de Interface */
         #modeMsg { 
             position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); 
             font-size: 0.8rem; color: #1565C0; font-weight: 700; 
@@ -124,7 +122,7 @@
 
         .hidden { display: none; }
         
-        /* Desktop fix */
+        /* Ajuste para Desktop */
         @media (min-width: 768px) {
             #main-container { flex-direction: row; }
             #controls { width: 360px; height: 100%; border-radius: 0; border-left: 1px solid #ddd; max-height: 100%; }
@@ -212,20 +210,25 @@
     let wakeLock = null;
 
     function initMap() {
-        // MAPA GOOGLE HÍBRIDO (CORRIGIDO PARA MÚLTIPLOS SERVIDORES)
+        // --- AQUI ESTÁ A LÓGICA DO MAPA CORRIGIDA ---
+        // Configuração inicial do Leaflet
         map = L.map('map', {zoomControl: false}).setView([-14.235, -51.925], 4);
         
-        // A correção está aqui: usamos {s} para alternar entre mt0, mt1, mt2, mt3
+        // Link híbrido do Google (Satélite + Ruas) com alternância de servidores (mt0, mt1...)
+        // Isso garante que o mapa carregue "certinho" como no seu teste
         L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { 
             maxZoom: 20, 
             subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
             attribution: '© Google' 
         }).addTo(map);
 
+        // Linha do trajeto (Ciano Brilhante)
         activeLine = L.polyline([], {color: '#00FFFF', weight: 6, opacity: 0.8}).addTo(map);
+        // Marcador do Usuário
         userMarker = L.circleMarker([0,0], { radius: 8, fillColor: '#2962ff', color: '#fff', weight: 3, fillOpacity: 1 });
     }
 
+    // --- FUNÇÕES DE GPS E GRAVAÇÃO ---
     function locateMe() {
         if (!navigator.geolocation) return alert("Sem suporte a GPS.");
         const btn = document.querySelector('.fab-locate svg');
@@ -283,13 +286,13 @@
         if (gpxData.length === 0) map.setView([lat, lon], 18);
         else map.panTo([lat, lon]);
 
-        if (acc > 50) return; 
+        if (acc > 50) return; // Ignora GPS impreciso
 
         let distTotal = 0;
         if (gpxData.length > 0) {
             const last = gpxData[gpxData.length - 1];
             const d = calcDistance(last.lat, last.lon, lat, lon);
-            if (d < 0.003) return;
+            if (d < 0.003) return; // Filtro de movimento mínimo (3m)
             distTotal = last.dist + d;
         }
 
@@ -309,6 +312,7 @@
         updateUI(); renderPoints();
     }
 
+    // --- IMPORTAR GPX ---
     document.getElementById('fileInput').addEventListener('change', function(e) {
         const file = e.target.files[0]; if (!file) return;
         if(isRecording) toggleRecording(); clearData();
@@ -333,6 +337,7 @@
         reader.readAsText(file);
     });
 
+    // --- CÁLCULOS E UI ---
     function calcDistance(lat1, lon1, lat2, lon2) {
         const R = 6371; const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLon = (lon2 - lon1) * Math.PI / 180;
@@ -365,6 +370,7 @@
     document.getElementById('sStart').addEventListener('input', updateUI);
     document.getElementById('sEnd').addEventListener('input', updateUI);
 
+    // --- MODOS E MARCADORES ---
     function toggleMode(mode) {
         const btnAlert = document.getElementById('btnAlert'); const btnInfo = document.getElementById('btnInfo');
         const msg = document.getElementById('modeMsg');
@@ -419,7 +425,6 @@
 
     let markersLayer = L.layerGroup().addTo(map);
     function addPoint(p) { customPoints.push(p); renderPoints(); }
-    
     function removePoint(i) { customPoints.splice(i, 1); renderPoints(); }
 
     function renderPoints() {
@@ -428,11 +433,11 @@
             const color = p.type === 'alert' ? '#ef6c00' : '#1565c0';
             const icon = L.divIcon({ className: 'c-pin', html: `<div style="background:${color};width:16px;height:16px;border:2px solid white;border-radius:50%;box-shadow:0 0 4px black;"></div>` });
             const m = L.marker([p.lat, p.lon], {icon: icon}).addTo(markersLayer);
-            
             m.bindPopup(`<b>${p.label}</b><br><button onclick="removePoint(${idx})" style="color:red;font-weight:bold;border:1px solid #ddd;background:white;padding:4px;margin-top:4px;">Excluir</button>`);
         });
     }
 
+    // --- SALVAR KML ---
     async function downloadKML() {
         if (gpxData.length === 0 && customPoints.length === 0) return alert("Nada para salvar.");
         const i = parseInt(document.getElementById('sStart').value);

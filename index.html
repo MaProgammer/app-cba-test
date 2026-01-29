@@ -14,7 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        /* --- ESTILO VISUAL "TOP" (LIMPO) --- */
+        /* --- ESTILO GERAL --- */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         body { margin: 0; padding: 0; height: 100dvh; width: 100vw; display: flex; flex-direction: column; background: #f0f2f5; overflow: hidden; }
 
@@ -27,7 +27,6 @@
         }
         .app-title { font-weight: 700; font-size: 1.1rem; line-height: 1.2; display: flex; flex-direction: column; }
         .app-subtitle { font-size: 0.7rem; opacity: 0.8; font-weight: 400; }
-        
         .header-actions { display: flex; gap: 8px; }
         .btn-header { 
             background: rgba(255,255,255,0.15); border: none; color: white; 
@@ -37,11 +36,10 @@
         }
         .btn-header:active { background: rgba(255,255,255,0.3); }
 
-        /* MAPA & CONTAINER */
+        /* MAPA */
         #main-container { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
         #map { flex: 1; width: 100%; background: #e5e3df; z-index: 1; }
         
-        /* BOTÃO FLUTUANTE LOCALIZAR */
         .fab-locate {
             position: absolute; bottom: 24px; right: 16px;
             background: white; width: 52px; height: 52px; border-radius: 50%;
@@ -54,59 +52,82 @@
 
         /* PAINEL DE CONTROLE */
         #controls { 
-            /* Altura ajustada automaticamente */
             background: #f2f4f8; 
             box-shadow: 0 -4px 20px rgba(0,0,0,0.15); border-radius: 20px 20px 0 0;
             display: flex; flex-direction: column; z-index: 999; position: relative;
         }
 
-        .panel-scroll { flex: 1; padding: 16px 16px 0 16px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .panel-scroll { flex: 1; padding: 16px 16px 0 16px; overflow-y: auto; }
 
-        /* CARD DE DADOS */
+        /* KPI CARD */
         .data-card {
             background: white; border-radius: 16px; padding: 16px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 12px;
         }
-
-        .kpi-row { display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0; }
+        .kpi-row { display: flex; justify-content: space-between; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0; }
         .kpi-item { text-align: center; flex: 1; }
         .kpi-val { font-size: 1.25rem; font-weight: 800; color: #1565C0; display: block; line-height: 1; }
         .kpi-lbl { font-size: 0.7rem; color: #888; font-weight: 700; text-transform: uppercase; margin-top: 4px; display: block; }
 
-        /* SLIDERS */
-        .slider-row { display: flex; flex-direction: column; gap: 10px; }
-        .slider-wrapper { display: flex; align-items: center; gap: 10px; }
-        .slider-label { font-size: 0.7rem; font-weight: bold; color: #555; width: 45px; }
-        input[type=range] { flex: 1; height: 6px; background: #e0e0e0; border-radius: 3px; -webkit-appearance: none; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; background: #1565C0; border-radius: 50%; box-shadow: 0 1px 4px rgba(0,0,0,0.3); border: 2px solid white; }
+        /* --- SLIDER DUPLO (INICIO E FIM NA MESMA LINHA) --- */
+        .range-container { position: relative; width: 100%; height: 40px; margin-top: 10px; }
+        
+        .slider-track-bg { 
+            position: absolute; top: 50%; left: 0; width: 100%; height: 6px; 
+            background: #e0e0e0; border-radius: 3px; transform: translateY(-50%); z-index: 1; 
+        }
+        
+        .slider-track-fill { 
+            position: absolute; top: 50%; height: 6px; 
+            background: #1565C0; z-index: 2; transform: translateY(-50%);
+            border-radius: 3px; pointer-events: none;
+        }
 
-        /* FOOTER (BOTÕES) */
+        input[type=range] {
+            position: absolute; top: 50%; left: 0; width: 100%; 
+            -webkit-appearance: none; pointer-events: none; /* Importante: deixa clicar no de baixo */
+            background: none; transform: translateY(-50%); z-index: 3; margin: 0;
+        }
+
+        /* Thumb (Botão) - Chrome/Safari */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; pointer-events: auto; /* Reativa o clique no botão */
+            width: 28px; height: 28px; border-radius: 50%; 
+            background: #1565C0; border: 3px solid white; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3); cursor: pointer;
+        }
+        
+        /* Thumb (Botão) - Firefox */
+        input[type=range]::-moz-range-thumb {
+            pointer-events: auto; width: 28px; height: 28px; border-radius: 50%; 
+            background: #1565C0; border: 3px solid white; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3); cursor: pointer; border: none;
+        }
+
+        .range-labels { display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: bold; color: #666; margin-bottom: -10px; }
+
+        /* FOOTER */
         .panel-footer {
             flex-shrink: 0; padding: 12px 16px; background: #f2f4f8; 
             padding-bottom: calc(12px + env(safe-area-inset-bottom));
             display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
         }
-
         .btn-action {
             height: 50px; border-radius: 12px; border: none; font-weight: 700; font-size: 0.85rem;
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-            cursor: pointer; transition: transform 0.1s; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.1s;
         }
         .btn-action:active { transform: scale(0.96); }
-
         .btn-alert { background: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; }
-        .btn-alert.active { background: #e65100; color: white; border: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
-        
+        .btn-alert.active { background: #e65100; color: white; border: none; }
         .btn-info { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
-        .btn-info.active { background: #1565c0; color: white; border: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
-        
+        .btn-info.active { background: #1565c0; color: white; border: none; }
         .btn-save { background: #2e7d32; color: white; grid-column: 3; }
 
-        /* Animação REC */
+        /* Animações e Mensagens */
         #btnRec.recording { background: #d32f2f; color: white; animation: pulse 1.5s infinite; border: 1px solid white; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(211, 47, 47, 0); } 100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); } }
-
-        /* Mensagens flutuantes */
+        
         #modeMsg { 
             position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); 
             font-size: 0.8rem; color: #1565C0; font-weight: 700; 
@@ -115,16 +136,13 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 1001;
         }
         #modeMsg.visible { opacity: 1; bottom: 80px; }
-        
         #gpsMsg { background: #ffebee; color: #c62828; text-align: center; font-size: 0.75rem; padding: 6px; font-weight: 700; display: none; }
-
         .hidden { display: none; }
         #fileInput { display: none; }
         
-        /* Desktop */
         @media (min-width: 768px) {
             #main-container { flex-direction: row; }
-            #controls { width: 380px; height: auto; min-height: auto; border-radius: 0; border-left: 1px solid #ddd; }
+            #controls { width: 380px; height: auto; border-radius: 0; border-left: 1px solid #ddd; }
             .fab-locate { bottom: 24px; right: 24px; }
         }
     </style>
@@ -166,18 +184,19 @@
                     <div class="kpi-item"><span class="kpi-val" id="valPts">0</span><span class="kpi-lbl">PTS</span></div>
                 </div>
                 
-                <div class="slider-row">
-                    <div class="slider-wrapper">
-                        <span class="slider-label">INÍCIO</span>
-                        <input type="range" id="sStart" min="0" value="0" disabled>
-                    </div>
-                    <div class="slider-wrapper">
-                        <span class="slider-label">FIM</span>
-                        <input type="range" id="sEnd" min="0" value="100" disabled>
-                    </div>
+                <div class="range-labels">
+                    <span>INÍCIO</span>
+                    <span>FIM</span>
                 </div>
+                <div class="range-container">
+                    <div class="slider-track-bg"></div>
+                    <div class="slider-track-fill" id="trackFill"></div>
+                    <input type="range" id="sStart" min="0" value="0" step="1">
+                    <input type="range" id="sEnd" min="0" value="100" step="1">
+                </div>
+                <div style="text-align: center; font-size: 0.7rem; color: #999; margin-top: 5px;">Ajuste o recorte da rota</div>
             </div>
-            </div>
+        </div>
 
         <div class="panel-footer">
             <button id="btnAlert" class="btn-action btn-alert" onclick="toggleMode('alert')">
@@ -199,20 +218,12 @@
 </div>
 
 <script>
-    // --- LÓGICA E MAPA ---
     let map, activeLine, userMarker;
-    let gpxData = []; 
-    let customPoints = []; 
-    let currentMode = null; 
-    let tempPoint = null; 
-    
-    let isRecording = false;
-    let watchId = null;
-    let wakeLock = null;
+    let gpxData = []; customPoints = []; currentMode = null; tempPoint = null; 
+    let isRecording = false; watchId = null; wakeLock = null;
 
     function initMap() {
         map = L.map('map', {zoomControl: false}).setView([-14.235, -51.925], 4);
-        // Link Híbrido do Google seguro
         L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { 
             maxZoom: 20, 
             subdomains: ['mt0','mt1','mt2','mt3'],
@@ -224,19 +235,18 @@
     }
 
     function locateMe() {
-        if (!navigator.geolocation) { alert("Seu navegador não suporta GPS."); return; }
+        if (!navigator.geolocation) { alert("GPS não disponível."); return; }
         const btn = document.querySelector('.fab-locate svg');
         btn.style.fill = '#2962ff';
-
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 const lat = pos.coords.latitude; const lon = pos.coords.longitude;
                 if(!map.hasLayer(userMarker)) userMarker.addTo(map);
                 userMarker.setLatLng([lat, lon]);
-                map.flyTo([lat, lon], 18, { animate: true, duration: 1.5 });
+                map.flyTo([lat, lon], 18);
                 btn.style.fill = '#555';
             },
-            (err) => { alert("Erro ao obter localização."); btn.style.fill = '#555'; },
+            (err) => { alert("Erro GPS."); btn.style.fill = '#555'; },
             { enableHighAccuracy: true }
         );
     }
@@ -244,27 +254,17 @@
     async function toggleRecording() {
         const btn = document.getElementById('btnRec');
         const statusHeader = document.getElementById('statusHeader');
-        
         if (!isRecording) {
-            try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
-            if (confirm("Iniciar nova gravação? (Isso limpará o mapa atual)")) clearData();
-
+            try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+            if (confirm("Gravar nova rota? (Apaga a atual)")) clearData();
             isRecording = true;
-            btn.innerHTML = "<span>⏹</span>";
-            btn.classList.add('recording');
-            statusHeader.innerText = "Gravando Rota...";
+            btn.innerHTML = "<span>⏹</span>"; btn.classList.add('recording'); statusHeader.innerText = "Gravando...";
             document.getElementById('gpsMsg').style.display = 'block';
-
-            if ("geolocation" in navigator) {
-                watchId = navigator.geolocation.watchPosition(successGPS, errorGPS, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
-            }
+            if ("geolocation" in navigator) watchId = navigator.geolocation.watchPosition(successGPS, errorGPS, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
         } else {
             isRecording = false;
-            btn.innerHTML = "<span>🔴</span> REC";
-            btn.classList.remove('recording');
-            statusHeader.innerText = "Gravação Finalizada";
+            btn.innerHTML = "<span>🔴</span> REC"; btn.classList.remove('recording'); statusHeader.innerText = "Pausado";
             document.getElementById('gpsMsg').style.display = 'none';
-
             if (watchId !== null) navigator.geolocation.clearWatch(watchId);
             if (wakeLock !== null) { wakeLock.release(); wakeLock = null; }
             if(gpxData.length > 0) map.fitBounds(activeLine.getBounds());
@@ -273,17 +273,12 @@
 
     function successGPS(position) {
         document.getElementById('gpsMsg').style.display = 'none';
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-        const ele = position.coords.altitude || 0;
-        const acc = position.coords.accuracy;
-
+        const lat = position.coords.latitude; const lon = position.coords.longitude;
+        const ele = position.coords.altitude || 0; const acc = position.coords.accuracy;
         if(!map.hasLayer(userMarker)) userMarker.addTo(map);
         userMarker.setLatLng([lat, lon]);
         
-        if (gpxData.length === 0) map.setView([lat, lon], 18);
-        else map.panTo([lat, lon]);
-
+        if (gpxData.length === 0) map.setView([lat, lon], 18); else map.panTo([lat, lon]);
         if (acc > 50) return; 
 
         let distTotal = 0;
@@ -293,17 +288,12 @@
             if (d < 0.003) return; 
             distTotal = last.dist + d;
         }
-
-        const newPoint = { lat, lon, ele, dist: distTotal };
-        gpxData.push(newPoint);
+        gpxData.push({ lat, lon, ele, dist: distTotal });
         activeLine.addLatLng([lat, lon]);
         updateUI();
     }
 
-    function errorGPS(err) {
-        document.getElementById('gpsMsg').innerText = "Sinal GPS fraco!";
-        document.getElementById('gpsMsg').style.display = 'block';
-    }
+    function errorGPS(err) { document.getElementById('gpsMsg').innerText = "Sinal fraco!"; document.getElementById('gpsMsg').style.display = 'block'; }
 
     function clearData() {
         gpxData = []; customPoints = [];
@@ -312,10 +302,8 @@
     }
 
     document.getElementById('fileInput').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        if(isRecording) toggleRecording();
-        clearData();
+        const file = e.target.files[0]; if (!file) return;
+        if(isRecording) toggleRecording(); clearData();
         document.getElementById('statusHeader').innerText = file.name;
 
         const reader = new FileReader();
@@ -323,22 +311,25 @@
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
             const trkpts = xmlDoc.getElementsByTagName("trkpt");
-            let distTotal = 0;
-            const latlngs = [];
-
+            let distTotal = 0; const latlngs = [];
             for (let i = 0; i < trkpts.length; i++) {
                 const lat = parseFloat(trkpts[i].getAttribute("lat"));
                 const lon = parseFloat(trkpts[i].getAttribute("lon"));
                 const ele = parseFloat(trkpts[i].getElementsByTagName("ele")[0]?.textContent || 0);
-                if (i > 0) {
-                    const prev = gpxData[i-1];
-                    distTotal += calcDistance(prev.lat, prev.lon, lat, lon);
-                }
-                gpxData.push({lat, lon, ele, dist: distTotal});
-                latlngs.push([lat, lon]);
+                if (i > 0) { const prev = gpxData[i-1]; distTotal += calcDistance(prev.lat, prev.lon, lat, lon); }
+                gpxData.push({lat, lon, ele, dist: distTotal}); latlngs.push([lat, lon]);
             }
             activeLine.setLatLngs(latlngs);
+            
+            // --- MELHORIA 1: AUTO RANGE NO CARREGAMENTO ---
             if (gpxData.length > 0) {
+                const sStart = document.getElementById('sStart');
+                const sEnd = document.getElementById('sEnd');
+                // Define limites
+                sStart.max = gpxData.length - 1; sEnd.max = gpxData.length - 1;
+                // Define valores para cobrir TUDO
+                sStart.value = 0; sEnd.value = gpxData.length - 1;
+                // Atualiza mapa e UI
                 map.fitBounds(activeLine.getBounds(), {padding: [20, 20]});
                 updateUI();
             }
@@ -347,88 +338,75 @@
     });
 
     function calcDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371; 
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const R = 6371; const dLat = (lat2 - lat1) * Math.PI / 180; const dLon = (lon2 - lon1) * Math.PI / 180;
         const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
         return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
     }
 
     function updateUI() {
-        const sStart = document.getElementById('sStart');
-        const sEnd = document.getElementById('sEnd');
+        const sStart = document.getElementById('sStart'); const sEnd = document.getElementById('sEnd');
+        const trackFill = document.getElementById('trackFill');
+
+        // Atualiza max se estiver gravando
+        if (isRecording) {
+            sStart.max = gpxData.length - 1; sEnd.max = gpxData.length - 1;
+            if(sEnd.value == (gpxData.length - 2)) sEnd.value = gpxData.length - 1; // Auto-scroll fim
+        }
+
+        let i = parseInt(sStart.value); let j = parseInt(sEnd.value);
         
-        if(sEnd.value == sEnd.max) {
-             sStart.max = gpxData.length - 1; sEnd.max = gpxData.length - 1; sEnd.value = gpxData.length - 1;
-        } else { sStart.max = gpxData.length - 1; sEnd.max = gpxData.length - 1; }
-        
-        if(sStart.disabled) { sStart.disabled = false; sEnd.disabled = false; }
-        updateMapFromSliders();
+        // Garante que inicio não passe o fim
+        if (i >= j) { j = i; sEnd.value = j; }
+
+        // --- MELHORIA 2: VISUAL DO SLIDER DUPLO ---
+        if (gpxData.length > 0) {
+            const max = parseInt(sEnd.max);
+            const perStart = (i / max) * 100;
+            const perEnd = (j / max) * 100;
+            trackFill.style.left = perStart + "%";
+            trackFill.style.width = (perEnd - perStart) + "%";
+        }
+
+        if(gpxData.length > 0) {
+            const slice = gpxData.slice(i, j + 1);
+            const dist = slice.length > 0 ? slice[slice.length-1].dist - slice[0].dist : 0;
+            let eleGain = 0;
+            for(let k=1; k < slice.length; k++) if(slice[k].ele > slice[k-1].ele) eleGain += slice[k].ele - slice[k-1].ele;
+            
+            document.getElementById('valDist').innerText = dist.toFixed(2);
+            document.getElementById('valEle').innerText = eleGain.toFixed(0);
+            document.getElementById('valPts').innerText = slice.length;
+            activeLine.setLatLngs(slice.map(p => [p.lat, p.lon]));
+        }
     }
-
-    function updateMapFromSliders() {
-        if(gpxData.length === 0) return;
-        const i = parseInt(document.getElementById('sStart').value);
-        let j = parseInt(document.getElementById('sEnd').value);
-        if (i >= j) { j = i + 1; document.getElementById('sEnd').value = j; }
-        
-        const slice = gpxData.slice(i, j + 1);
-        const dist = slice[slice.length-1].dist - slice[0].dist;
-        let eleGain = 0;
-        for(let k=1; k < slice.length; k++) { if(slice[k].ele > slice[k-1].ele) eleGain += slice[k].ele - slice[k-1].ele; }
-
-        document.getElementById('valDist').innerText = dist.toFixed(2);
-        document.getElementById('valEle').innerText = eleGain.toFixed(0);
-        document.getElementById('valPts').innerText = slice.length;
-        
-        activeLine.setLatLngs(slice.map(p => [p.lat, p.lon]));
-    }
-
-    document.getElementById('sStart').addEventListener('input', updateMapFromSliders);
-    document.getElementById('sEnd').addEventListener('input', updateMapFromSliders);
+    document.getElementById('sStart').addEventListener('input', updateUI); document.getElementById('sEnd').addEventListener('input', updateUI);
 
     function toggleMode(mode) {
-        const btnAlert = document.getElementById('btnAlert');
-        const btnInfo = document.getElementById('btnInfo');
-        const msg = document.getElementById('modeMsg');
-        
+        const btnAlert = document.getElementById('btnAlert'); const btnInfo = document.getElementById('btnInfo'); const msg = document.getElementById('modeMsg');
         if (currentMode === mode) {
-            currentMode = null;
-            btnAlert.classList.remove('active'); btnInfo.classList.remove('active');
-            msg.classList.remove('visible'); 
-            L.DomUtil.removeClass(map.getContainer(), 'leaflet-crosshair');
+            currentMode = null; btnAlert.classList.remove('active'); btnInfo.classList.remove('active'); msg.classList.remove('visible'); L.DomUtil.removeClass(map.getContainer(), 'leaflet-crosshair');
         } else {
-            currentMode = mode;
-            L.DomUtil.addClass(map.getContainer(), 'leaflet-crosshair');
+            currentMode = mode; L.DomUtil.addClass(map.getContainer(), 'leaflet-crosshair');
             if(mode === 'alert') { btnAlert.classList.add('active'); btnInfo.classList.remove('active'); msg.innerText = "Toque na rota para PERIGO ⚠️"; }
             else { btnInfo.classList.add('active'); btnAlert.classList.remove('active'); msg.innerText = "Toque na rota para INFO ℹ️"; }
-            msg.classList.add('visible'); 
+            msg.classList.add('visible');
         }
     }
 
-    initMap();
     map.on('click', function(e) {
         if (!currentMode) return;
-        let target = null;
-
+        let target = { lat: e.latlng.lat, lon: e.latlng.lng, ele: 0 };
         if (gpxData.length > 0) {
-            let nearest = null; let minDist = Infinity;
+            let minDist = Infinity;
             for (const p of gpxData) {
                 const d = Math.pow(p.lat - e.latlng.lat, 2) + Math.pow(p.lon - e.latlng.lng, 2);
-                if (d < minDist) { minDist = d; nearest = p; }
+                if (d < minDist) { minDist = d; target = p; }
             }
-            target = nearest;
-        } else {
-            target = { lat: e.latlng.lat, lon: e.latlng.lng, ele: 0, dist: 0 };
         }
-
-        if (target) {
-            const label = prompt("Descrição:", currentMode === 'alert' ? "Buraco" : "Nota");
-            if (label) {
-                tempPoint = { ...target, label: label, type: currentMode, image: null };
-                if (confirm("Adicionar foto?")) document.getElementById('imgUpload').click();
-                else addPoint(tempPoint);
-            }
+        const label = prompt("Descrição:", currentMode === 'alert' ? "Buraco" : "Nota");
+        if (label) {
+            tempPoint = { ...target, label: label, type: currentMode, image: null };
+            if (confirm("Adicionar foto?")) document.getElementById('imgUpload').click(); else addPoint(tempPoint);
         }
         toggleMode(currentMode);
     });
@@ -436,22 +414,17 @@
     document.getElementById('imgUpload').addEventListener('change', function(e) {
         if (this.files && this.files[0] && tempPoint) {
             const reader = new FileReader();
-            reader.onload = function(evt) {
-                resizeImage(evt.target.result, function(res) { tempPoint.image = res; addPoint(tempPoint); });
-            };
+            reader.onload = function(evt) { resizeImage(evt.target.result, function(res) { tempPoint.image = res; addPoint(tempPoint); }); };
             reader.readAsDataURL(this.files[0]);
         }
     });
 
     function resizeImage(base64Str, callback) {
-        const img = new Image();
-        img.src = base64Str;
+        const img = new Image(); img.src = base64Str;
         img.onload = function() {
-            const canvas = document.createElement('canvas');
-            const MAX_W = 600; const scale = MAX_W / img.width;
+            const canvas = document.createElement('canvas'); const MAX_W = 600; const scale = MAX_W / img.width;
             canvas.width = MAX_W; canvas.height = img.height * scale;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             callback(canvas.toDataURL('image/jpeg', 0.6));
         }
     }
@@ -459,31 +432,23 @@
     let markersLayer = L.layerGroup().addTo(map);
     function addPoint(p) { customPoints.push(p); renderPoints(); }
     function removePoint(i) { customPoints.splice(i, 1); renderPoints(); }
-
     function renderPoints() {
-        // Agora só renderizamos no mapa, sem lista
         markersLayer.clearLayers();
         customPoints.forEach((p, idx) => {
             const color = p.type === 'alert' ? '#ef6c00' : '#1565c0';
             const icon = L.divIcon({ className: 'c-pin', html: `<div style="background:${color};width:16px;height:16px;border:2px solid white;border-radius:50%;box-shadow:0 0 4px black;"></div>` });
             const m = L.marker([p.lat, p.lon], {icon: icon}).addTo(markersLayer);
-            
-            // Adicionei botão de excluir no balãozinho do mapa, já que não temos mais lista
             m.bindPopup(`<b>${p.label}</b><br><button onclick="removePoint(${idx})" style="color:red;font-weight:bold;border:1px solid #ddd;background:white;padding:4px;margin-top:4px;cursor:pointer;">Excluir</button>`);
         });
     }
 
     async function downloadKML() {
         if (gpxData.length === 0 && customPoints.length === 0) return alert("Nada para salvar.");
-        
-        const i = parseInt(document.getElementById('sStart').value);
-        const j = parseInt(document.getElementById('sEnd').value);
+        const i = parseInt(document.getElementById('sStart').value); const j = parseInt(document.getElementById('sEnd').value);
         const slice = gpxData.slice(i, j + 1);
-
         let imgChart = '';
         if(slice.length > 1) {
-            const ctx = document.getElementById('chartCanvas').getContext('2d');
-            ctx.clearRect(0,0,320,150);
+            const ctx = document.getElementById('chartCanvas').getContext('2d'); ctx.clearRect(0,0,320,150);
             if(window.myChart) window.myChart.destroy();
             window.myChart = new Chart(ctx, {
                 type: 'line',
@@ -493,35 +458,22 @@
             await new Promise(r => setTimeout(r, 200));
             imgChart = document.getElementById('chartCanvas').toDataURL('image/png');
         }
-
         const coords = slice.map(p => `${p.lon},${p.lat},${p.ele}`).join(' ');
         const distTotal = slice.length > 0 ? (slice[slice.length-1].dist - slice[0].dist).toFixed(2) : "0.00";
-        
         let pointsXML = '';
         customPoints.forEach(p => {
             const style = p.type === 'alert' ? 'iconAlert' : 'iconInfo';
             const img = p.image ? `<br><img src="${p.image}" style="width:250px; border:1px solid #ccc;">` : '';
             pointsXML += `<Placemark><name>${p.label}</name><styleUrl>#${style}</styleUrl><description><![CDATA[<h3>${p.label}</h3>${img}]]></description><Point><coordinates>${p.lon},${p.lat},${p.ele}</coordinates></Point></Placemark>`;
         });
-
-        const rotaXML = slice.length > 1 ? `
-        <Placemark>
-            <name>Traçado - ${distTotal}km</name>
-            <styleUrl>#lineCyan</styleUrl>
-            <description><![CDATA[<div style="font-family:Arial; width:300px;"><h3 style="color:#1565C0;">Resumo</h3><p>Distância: <b>${distTotal} km</b></p><img src="${imgChart}" style="width:100%;"></div>]]></description>
-            <LineString><tessellate>1</tessellate><coordinates>${coords}</coordinates></LineString>
-        </Placemark>` : '';
-
+        const rotaXML = slice.length > 1 ? `<Placemark><name>Traçado - ${distTotal}km</name><styleUrl>#lineCyan</styleUrl><description><![CDATA[<div style="font-family:Arial; width:300px;"><h3 style="color:#1565C0;">Resumo</h3><p>Distância: <b>${distTotal} km</b></p><img src="${imgChart}" style="width:100%;"></div>]]></description><LineString><tessellate>1</tessellate><coordinates>${coords}</coordinates></LineString></Placemark>` : '';
         const kml = `<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Rota CBA</name><Style id="lineCyan"><LineStyle><color>ffFFFF00</color><width>5</width></LineStyle></Style><Style id="iconAlert"><IconStyle><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/caution.png</href></Icon></IconStyle></Style><Style id="iconInfo"><IconStyle><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/blue-pushpin.png</href></Icon></IconStyle></Style>${rotaXML}<Folder><name>Ocorrências</name>${pointsXML}</Folder></Document></kml>`;
-        
         const blob = new Blob([kml], {type: 'application/vnd.google-earth.kml+xml'});
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `Rota_CBA_${distTotal}km.kml`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
+        link.download = `Rota_CBA_${distTotal}km.kml`; document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
+
+    initMap();
 </script>
 </body>
 </html>

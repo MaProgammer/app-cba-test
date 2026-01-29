@@ -221,14 +221,8 @@
 
     function initMap() {
         map = L.map('map', {zoomControl: false}).setView([-14.235, -51.925], 4);
-        
-        // --- MAPA CORRIGIDO (Igual ao seu código funcional) ---
-        // Adiciona HTTPS para evitar bloqueios de segurança
-        L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { 
-            maxZoom: 20, 
-            subdomains: ['mt0','mt1','mt2','mt3'],
-            attribution: '© Google'
-        }).addTo(map);
+        L.control.zoom({position: 'topleft'}).addTo(map);
+        L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'] }).addTo(map);
 
         activeLine = L.polyline([], {color: '#00FFFF', weight: 6, opacity: 0.8}).addTo(map);
         userMarker = L.circleMarker([0,0], { radius: 8, fillColor: '#2962ff', color: '#fff', weight: 3, fillOpacity: 1 });
@@ -470,3 +464,4 @@
 </script>
 </body>
 </html>
+
